@@ -1,3 +1,5 @@
+import html
+import shitgram
 
 class User:
     id: int
@@ -11,3 +13,11 @@ class User:
     can_join_groups: bool
     can_read_all_group_messages: bool
     supports_inline_queries: bool
+    mention: "shitgram.types.Mention"
+
+    def _parse(self, dc: dict):
+        dc['mention'] = {
+            'markdown': '[{}](tg://user?id={})'.format(html.escape(dc['first_name']), str(dc['id'])),
+            'html': '<a href="tg://user?id={}">{}</a>'.format(str(dc['id']), html.escape(dc['first_name']))
+        }
+        return dc

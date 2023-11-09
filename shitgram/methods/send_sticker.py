@@ -5,15 +5,13 @@ from typing import Union, List
 
 import shitgram
 
-class SendMessage:
-    async def sendMessage(
+class SendSticker:
+    async def sendSticker(
             self: "shitgram.Bot",
             chat_id: Union[int, str],
-            text: str,
-            parse_mode: str = None,
+            sticker: Union["shitgram.types.InputFile", str],
+            emoji: str = None,
             message_thread_id: int = None,
-            entities: List["shitgram.types.MessageEntity"] = None,
-            disable_web_page_preview: bool = None,
             disable_notification: bool = None,
             protect_content: bool = None,
             reply_to_message_id: int = None,
@@ -22,16 +20,12 @@ class SendMessage:
     ) -> "shitgram.types.Message":
         data = {
             'chat_id': chat_id,
-            'text': text
+            'sticker': sticker
         }
         if message_thread_id:
             data['message_thread_id']=message_thread_id
-        if parse_mode:
-            data['parse_mode']=parse_mode
-        if entities:
-            data['entities']=dumps([i.__dict__.get("_dtc__dict") for i in entities], ensure_ascii=False)
-        if disable_web_page_preview:
-            data['disable_web_page_preview']=disable_web_page_preview
+        if emoji:
+            data['emoji']=emoji
         if disable_notification:
             data['disable_notification']=disable_notification
         if protect_content:
@@ -48,7 +42,7 @@ class SendMessage:
 
         async with aiohttp.ClientSession() as client:
             async with client.post(
-                self.api.format(self.bot_token, "sendMessage"),
+                self.api.format(self.bot_token, "sendSticker"),
                 data=data
             ) as resp:
                 resp_json: dict = await resp.json()

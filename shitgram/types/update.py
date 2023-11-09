@@ -1,5 +1,6 @@
 from json import dumps
 from .message import Message
+from .user import User
 
 class Parser:
     def __init__(self):
@@ -29,14 +30,16 @@ class dtc(Parser):
             try:
                 for i in dic:
                     if isinstance(dic[i], dict):
-                        setattr(self, "from_user" if i == "from" else i, dtc(dic[i]))
+                        if dic[i].get("language_code"):
+                            dic[i]=User()._parse(dic[i])
+                        setattr(self, "from_user" if i == "from" else "message" if i == "edited_message" else i, dtc(dic[i]))
                     elif isinstance(dic[i], list):
                         setattr(self, i, [dtc(x) if isinstance(x, dict) else x for x in dic[i]])
                     else:
                         setattr(self, i, dic[i])
                 __ = True
-            except Exception:
-                pass
+            except Exception as e:
+                print(e)
 
     def __getattr__(self, __name: str) -> None:
         return None
@@ -46,4 +49,9 @@ class Update:
         self.message: Message
 
     def _parse(self, dt: dict) -> "Update":
+        for i in dt:
+            if (
+                isinstance(dt[i], dict) and i == "message"
+            ):
+                dt['message']=Message()._parse(dt['message'])
         return dtc(dt)

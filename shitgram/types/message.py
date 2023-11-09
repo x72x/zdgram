@@ -2,11 +2,13 @@ from .user import User
 from .chat import Chat
 from .location import Location
 from .message_entity import MessageEntity
+from .sticker import Sticker
 
 from typing import List
 
 class Message:
     message_id: int
+    id: int
     message_thread_id: int
     from_user: "User"
     sender_chat: "Chat"
@@ -32,7 +34,7 @@ class Message:
     audio: None
     document: None
     photo: None
-    sticker: None
+    sticker: "Sticker"
     story: None
     video: None
     video_note: None
@@ -78,3 +80,7 @@ class Message:
     video_chat_participants_invited: None
     web_app_data: None
     reply_markup: None
+
+    def _parse(self, dt: dict):
+        dt['id']=dt['message_id']
+        return dt

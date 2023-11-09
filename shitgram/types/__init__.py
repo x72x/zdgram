@@ -6,3 +6,6 @@ from .chat_permissions import ChatPermissions
 from .location import Location
 from .chat_location import ChatLocation
 from .message_entity import MessageEntity
+from .mention import Mention
+from .sticker import Sticker
+from .input_file import InputFile
