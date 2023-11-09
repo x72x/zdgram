@@ -3,8 +3,8 @@ import os
 import re
 
 
-with open("README.md", encoding="utf-8") as f:
-    long_description = "\n" + f.read()
+# with open("README.md", encoding="utf-8") as f:
+#     long_description = "\n" + f.read()
 
 with open("shitgram/__init__.py", encoding="utf-8") as f:
     VERSION = re.findall(r"__version__ = \"(.+)\"", f.read())[0]
@@ -19,7 +19,7 @@ setup(
     author_email="y8838@hotmail.com",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
-    long_description=long_description,
+    long_description=DESCRIPTION,
     packages=find_packages(),
     install_requires=['asyncio', 'aiohttp', 'aiofiles'],
     keywords=['bots', 'bot-api', 'telegram'],
