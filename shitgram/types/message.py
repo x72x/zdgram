@@ -57,8 +57,8 @@ class Message:
     pinned_message: "Message"
     invoice: None
     successful_payment: None
-    user_shared: None
-    chat_shared: None
+    user_shared: "shitgram.types.UserShared"
+    chat_shared: "shitgram.types.ChatShared"
     connected_website: str
     write_access_allowed: None
     passport_data: None

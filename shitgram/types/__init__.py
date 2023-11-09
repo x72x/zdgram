@@ -11,3 +11,8 @@ from .sticker import Sticker
 from .input_file import InputFile
 from .callbackquery import CallbackQuery
 from .inline_keyboard import InlineKeyboardButton, InlineKeyboardMarkup
+from .force_reply import ForceReply
+from .reply_keyboard import *
+from .chat_administrator_rights import ChatAdministratorRights
+from .user_shared import UserShared
+from .chat_shared import ChatShared

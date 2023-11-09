@@ -16,7 +16,12 @@ class SendSticker:
             protect_content: bool = None,
             reply_to_message_id: int = None,
             allow_sending_without_reply: bool = None,
-            reply_markup: Union["shitgram.types.InlineKeyboardMarkup", str, dict] = None
+            reply_markup: Union[
+                "shitgram.types.InlineKeyboardMarkup",
+                "shitgram.types.ForceReply",
+                "shitgram.types.ReplyKeyboardMarkup",
+                "shitgram.types.ReplyKeyboardRemove"
+            ] = None
     ) -> "shitgram.types.Message":
         data = {
             'chat_id': chat_id,
@@ -35,12 +40,7 @@ class SendSticker:
         if allow_sending_without_reply:
             data['allow_sending_without_reply']=allow_sending_without_reply
         if reply_markup:
-            if isinstance(reply_markup, dict):
-                data['reply_markup']=dumps(reply_markup, ensure_ascii=False)
-            elif isinstance(reply_markup, str):
-                data['reply_markup']=reply_markup
-            elif isinstance(reply_markup, shitgram.types.InlineKeyboardMarkup):
-                data['reply_markup']=str(reply_markup)
+            data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
 
         async with aiohttp.ClientSession() as client:
             async with client.post(
