@@ -5,10 +5,11 @@ import logging
 from typing import Callable
 from .methods import Methods
 from .types import Update
+from .handlers import Handlers
 
 API_URL = "https://api.telegram.org/bot{}/{}"
 
-class Bot(Methods):
+class Bot(Methods, Handlers):
     def __init__(self, bot_token: str, api_url: str = None) -> None:
         self.bot_token = bot_token
         self.__cache = []
@@ -35,7 +36,7 @@ class Bot(Methods):
         while True:
             async with aiohttp.ClientSession() as client:
                 async with client.post(
-                    API_URL.format(self.bot_token, "getUpdates"),
+                    self.api.format(self.bot_token, "getUpdates"),
                     data=self.getUpdatesData
                 ) as resp:
                     updates = await resp.json()
@@ -83,35 +84,9 @@ class Bot(Methods):
                                             func=lambda: self.loop.create_task(func['func'](self, upd.callback_query))
                                         )
 
-
     async def auto_clean_cache(self):
         while not await asyncio.sleep(500):
             self.__cache_infos.clear()
-
-    @property
-    def onUpdate(self):
-        def decorator(func: Callable) -> Callable:
-            self.add_any_update_handler(func)
-
-        return decorator
-
-    def onMessage(self, func: Callable = None):
-        def decorator(func_: Callable) -> Callable:
-            self.add_message_handler(func_, func)
-
-        return decorator
-
-    def onEditedMessage(self, func: Callable = None):
-        def decorator(func_: Callable) -> Callable:
-            self.add_edited_message_handler(func_, func)
-
-        return decorator
-
-    def onCallbackQuery(self, func: Callable = None):
-        def decorator(func_: Callable) -> Callable:
-            self.add_callback_query_handler(func_, func)
-
-        return decorator
 
     def add_any_update_handler(self, func: Callable) -> Callable:
         self.__funcs.append(func)
