@@ -1,5 +1,4 @@
 from typing import List
-
 import shitgram
 
 class Chat:
@@ -31,4 +30,4 @@ class Chat:
     sticker_set_name: str
     can_set_sticker_set: bool
     linked_chat_id: int
-    location: "shitgram.types.ChatLocation"
+    location: "shitgram.types.Location"

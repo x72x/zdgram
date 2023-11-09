@@ -1,5 +1,5 @@
 from typing import Union, List
-from .update import Parser
+from .parser import Parser
 
 class InlineKeyboardMarkup(
     Parser

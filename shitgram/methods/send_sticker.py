@@ -40,12 +40,7 @@ class SendSticker:
             elif isinstance(reply_markup, str):
                 data['reply_markup']=reply_markup
             elif isinstance(reply_markup, shitgram.types.InlineKeyboardMarkup):
-                data_ = {'inline_keyboard': []}
-                for i in reply_markup.inline_keyboard:
-                    data_['inline_keyboard'].append(
-                        [x.__dict__ for x in i]
-                    )
-                data['reply_markup']=dumps(data_, ensure_ascii=False)
+                data['reply_markup']=str(reply_markup)
 
         async with aiohttp.ClientSession() as client:
             async with client.post(

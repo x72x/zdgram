@@ -14,7 +14,7 @@ async def on_anything(bot: Bot, update: Update):
 
 @bot.onMessage(func=lambda m: m.sticker)
 async def on_stickers(bot: Bot, message: Message):
-    await bot.sendMessage(
+    msg = await bot.sendMessage(
         message.chat.id,
         message.sticker.file_id,
         reply_markup=InlineKeyboardMarkup(
@@ -31,6 +31,8 @@ async def on_stickers(bot: Bot, message: Message):
         ),
         reply_to_message_id=message.id
     )
+    # print(msg)
+    # print(msg.reply_markup.inline_keyboard)
 
 @bot.onEditedMessage(func=lambda m: m.photo)
 async def on_edited(bot: Bot, message: Message):

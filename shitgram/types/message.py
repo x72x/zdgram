@@ -1,21 +1,16 @@
-from .user import User
-from .chat import Chat
-from .location import Location
-from .message_entity import MessageEntity
-from .sticker import Sticker
-
+import shitgram
 from typing import List
 
 class Message:
     message_id: int
     id: int
     message_thread_id: int
-    from_user: "User"
-    sender_chat: "Chat"
+    from_user: "shitgram.types.User"
+    sender_chat: "shitgram.types.Chat"
     date: int
-    chat: "Chat"
-    forward_from: "User"
-    forward_from_chat: "Chat"
+    chat: "shitgram.types.Chat"
+    forward_from: "shitgram.types.User"
+    forward_from_chat: "shitgram.types.Chat"
     forward_from_message_id: int
     forward_signature: str
     forward_sender_name: str
@@ -23,18 +18,18 @@ class Message:
     is_topic_message: bool
     is_automatic_forward: bool
     reply_to_message: "Message"
-    via_bot: "User"
+    via_bot: "shitgram.types.User"
     edit_date: int
     has_protected_content: bool
     media_group_id: str
     author_signature: str
     text: str
-    entities: List["MessageEntity"]
+    entities: List["shitgram.types.MessageEntity"]
     animation: None
     audio: None
     document: None
     photo: None
-    sticker: "Sticker"
+    sticker: "shitgram.types.Sticker"
     story: None
     video: None
     video_note: None
@@ -47,9 +42,9 @@ class Message:
     game: None
     poll: None
     venue: None
-    location: "Location"
-    new_chat_members: list["User"]
-    left_chat_member: "User"
+    location: "shitgram.types.Location"
+    new_chat_members: list["shitgram.types.User"]
+    left_chat_member: "shitgram.types.User"
     new_chat_title: str
     new_chat_photo: list
     delete_chat_photo: bool
@@ -79,7 +74,7 @@ class Message:
     video_chat_ended: None
     video_chat_participants_invited: None
     web_app_data: None
-    reply_markup: None
+    reply_markup: "shitgram.types.InlineKeyboardMarkup"
 
     def _parse(self, dt: dict):
         dt['id']=dt['message_id']
