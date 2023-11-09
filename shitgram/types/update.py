@@ -1,6 +1,7 @@
 from json import dumps
 from .message import Message
 from .user import User
+from .callbackquery import CallbackQuery
 
 class Parser:
     def __init__(self):
@@ -30,7 +31,7 @@ class dtc(Parser):
             try:
                 for i in dic:
                     if isinstance(dic[i], dict):
-                        if dic[i].get("language_code"):
+                        if i == "from":
                             dic[i]=User()._parse(dic[i])
                         setattr(self, "from_user" if i == "from" else "message" if i == "edited_message" else i, dtc(dic[i]))
                     elif isinstance(dic[i], list):
@@ -45,8 +46,8 @@ class dtc(Parser):
         return None
 
 class Update:
-    def __init__(self):
-        self.message: Message
+    message: Message
+    callback_query: CallbackQuery
 
     def _parse(self, dt: dict) -> "Update":
         for i in dt:
@@ -54,4 +55,9 @@ class Update:
                 isinstance(dt[i], dict) and i == "message"
             ):
                 dt['message']=Message()._parse(dt['message'])
+            elif (
+                isinstance(dt[i], dict) and i == "callback_query"
+            ):
+                dt['callback_query']['message']=Message()._parse(dt['callback_query']['message'])
+
         return dtc(dt)

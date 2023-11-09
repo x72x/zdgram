@@ -15,6 +15,7 @@ class Bot(Methods):
         self.__funcs = []
         self.__message_handlers = []
         self.__edited_message_handlers = []
+        self.__callback_query_handlers = []
         self.__cache_infos = {}
         self.api = api_url or API_URL
 
@@ -72,6 +73,16 @@ class Bot(Methods):
                                             func=lambda: self.loop.create_task(func['func'](self, upd.message))
                                         )
 
+                            if upd.callback_query:
+                                for func in self.__callback_query_handlers:
+                                    if (func['filter_func']) and not func['filter_func'](upd.callback_query):
+                                        continue
+                                    else:
+                                        await self.loop.run_in_executor(
+                                            None,
+                                            func=lambda: self.loop.create_task(func['func'](self, upd.callback_query))
+                                        )
+
 
     async def auto_clean_cache(self):
         while not await asyncio.sleep(500):
@@ -96,8 +107,22 @@ class Bot(Methods):
 
         return decorator
 
+    def onCallbackQuery(self, func: Callable = None):
+        def decorator(func_: Callable) -> Callable:
+            self.add_callback_query_handler(func_, func)
+
+        return decorator
+
     def add_any_update_handler(self, func: Callable) -> Callable:
         self.__funcs.append(func)
+
+    def add_callback_query_handler(self, func_: Callable, func: Callable = None) -> Callable:
+        self.__callback_query_handlers.append(
+            {
+                "func": func_,
+                "filter_func": func
+            }
+        )
 
     def add_edited_message_handler(self, func_: Callable, func: Callable = None) -> Callable:
         self.__edited_message_handlers.append(

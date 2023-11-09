@@ -18,7 +18,7 @@ class SendMessage:
             protect_content: bool = None,
             reply_to_message_id: int = None,
             allow_sending_without_reply: bool = None,
-            reply_markup: Union[str, dict] = None
+            reply_markup: Union["shitgram.types.InlineKeyboardMarkup", str, dict] = None
     ) -> "shitgram.types.Message":
         data = {
             'chat_id': chat_id,
@@ -45,6 +45,13 @@ class SendMessage:
                 data['reply_markup']=dumps(reply_markup, ensure_ascii=False)
             elif isinstance(reply_markup, str):
                 data['reply_markup']=reply_markup
+            elif isinstance(reply_markup, shitgram.types.InlineKeyboardMarkup):
+                data_ = {'inline_keyboard': []}
+                for i in reply_markup.inline_keyboard:
+                    data_['inline_keyboard'].append(
+                        [x.__dict__ for x in i]
+                    )
+                data['reply_markup']=dumps(data_, ensure_ascii=False)
 
         async with aiohttp.ClientSession() as client:
             async with client.post(

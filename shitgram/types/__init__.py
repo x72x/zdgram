@@ -9,3 +9,5 @@ from .message_entity import MessageEntity
 from .mention import Mention
 from .sticker import Sticker
 from .input_file import InputFile
+from .callbackquery import CallbackQuery
+from .inline_keyboard import InlineKeyboardButton, InlineKeyboardMarkup
