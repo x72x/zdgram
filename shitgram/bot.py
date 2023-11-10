@@ -1,6 +1,8 @@
 import aiohttp
 import asyncio
 import logging
+import ssl
+import certifi
 
 from typing import Callable
 from .methods import Methods
@@ -8,6 +10,37 @@ from .types import Update
 from .handlers import Handlers
 
 API_URL = "https://api.telegram.org/bot{}/{}"
+
+class SessionManager:
+    # https://github.com/eternnoir/pyTelegramBotAPI/blob/f91f42321c95e0cedda483ba5442e0b4eee057c5/telebot/asyncio_helper.py#L31
+    def __init__(self) -> None:
+        self.session = None
+        self.ssl_context = ssl.create_default_context(cafile=certifi.where())
+
+
+    async def create_session(self):
+        self.session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(
+            limit=50,
+            ssl_context=self.ssl_context
+        ))
+        return self.session
+
+    async def get_session(self):
+        if self.session is None:
+            self.session = await self.create_session()
+            return self.session
+
+        if self.session.closed:
+            self.session = await self.create_session()
+
+        # noinspection PyProtectedMember
+        if not self.session._loop.is_running():
+            await self.session.close()
+            self.session = await self.create_session()
+        return self.session
+
+
+session_manager = SessionManager()
 
 class Bot(Methods, Handlers):
     def __init__(self, bot_token: str, api_url: str = None) -> None:
@@ -17,7 +50,7 @@ class Bot(Methods, Handlers):
         self.__message_handlers = []
         self.__edited_message_handlers = []
         self.__callback_query_handlers = []
-        self.__cache_infos = {}
+        self._cache_infos = {}
         self.api = api_url or API_URL
 
         try:
@@ -29,16 +62,17 @@ class Bot(Methods, Handlers):
         self.loop = loop
         self.getUpdatesData = {
             "offset": -1,
-            "timeout": 600
         }
 
     async def get_updates(self):
         while True:
-            async with aiohttp.ClientSession() as client:
-                async with client.post(
-                    self.api.format(self.bot_token, "getUpdates"),
-                    data=self.getUpdatesData
-                ) as resp:
+            session = await session_manager.get_session()
+            async with session.request(
+                    method="post",
+                    url=self.api.format(self.bot_token, "getUpdates"),
+                    data=self.getUpdatesData,
+                    timeout=aiohttp.ClientTimeout(total=300)
+            ) as resp:
                     updates = await resp.json()
                     for update in updates.get("result"):
                         if not self.__cache:
@@ -49,40 +83,44 @@ class Bot(Methods, Handlers):
                             self.__cache.append(update.get("update_id"))
                             upd = Update()._parse(update)
                             for func in self.__funcs:
-                                await self.loop.run_in_executor(
-                                    None,
-                                    func=lambda: self.loop.create_task(func(self, upd))
-                                )
+                                # await self.loop.run_in_executor(
+                                #     None,
+                                #     func=lambda: self.loop.create_task(func(self, upd))
+                                # )
+                                self.loop.create_task(func['func'](self, upd))
 
                             if upd.message and not upd.message.edit_date:
                                 for func in self.__message_handlers:
                                     if (func['filter_func']) and not func['filter_func'](upd.message):
                                         continue
                                     else:
-                                        await self.loop.run_in_executor(
-                                            None,
-                                            func=lambda: self.loop.create_task(func['func'](self, upd.message))
-                                        )
+                                        # await self.loop.run_in_executor(
+                                        #     None,
+                                        #     func=lambda: self.loop.create_task(func['func'](self, upd.message))
+                                        # )
+                                        self.loop.create_task(func['func'](self, upd.message))
 
                             if upd.message and upd.message.edit_date:
                                 for func in self.__edited_message_handlers:
                                     if (func['filter_func']) and not func['filter_func'](upd.message):
                                         continue
                                     else:
-                                        await self.loop.run_in_executor(
-                                            None,
-                                            func=lambda: self.loop.create_task(func['func'](self, upd.message))
-                                        )
+                                        # await self.loop.run_in_executor(
+                                        #     None,
+                                        #     func=lambda: self.loop.create_task(func['func'](self, upd.message))
+                                        # )
+                                        self.loop.create_task(func['func'](self, upd.message))
 
                             if upd.callback_query:
                                 for func in self.__callback_query_handlers:
                                     if (func['filter_func']) and not func['filter_func'](upd.callback_query):
                                         continue
                                     else:
-                                        await self.loop.run_in_executor(
-                                            None,
-                                            func=lambda: self.loop.create_task(func['func'](self, upd.callback_query))
-                                        )
+                                        # await self.loop.run_in_executor(
+                                        #     None,
+                                        #     func=lambda: self.loop.create_task(func['func'](self, upd.callback_query))
+                                        # )
+                                        self.loop.create_task(func['func'](self, upd.callback_query))
 
     async def auto_clean_cache(self):
         while not await asyncio.sleep(500):

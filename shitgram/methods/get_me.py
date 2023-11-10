@@ -5,8 +5,8 @@ from json import dumps
 
 class GetMe:
     async def getMe(self: "shitgram.Bot") -> "shitgram.types.User":
-        if "me" in self.cache_infos:
-            return self.cache_infos['me']
+        if "me" in self._cache_infos:
+            return self._cache_infos['me']
         else:
             async with aiohttp.ClientSession() as client:
                 async with client.post(
@@ -18,5 +18,5 @@ class GetMe:
                             dumps(resp_json, ensure_ascii=False)
                         )
                     me = shitgram.types.Update()._parse(shitgram.types.User()._parse(resp_json.get("result")))
-                    self.cache_infos['me']=me
+                    self._cache_infos['me']=me
                     return me

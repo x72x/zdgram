@@ -23,7 +23,8 @@ class CopyMessage:
                 "shitgram.types.ForceReply",
                 "shitgram.types.ReplyKeyboardMarkup",
                 "shitgram.types.ReplyKeyboardRemove"
-            ] = None
+            ] = None,
+            timeout: int = None
     ) -> "shitgram.types.Message":
         data = {
             'chat_id': chat_id,
@@ -49,14 +50,16 @@ class CopyMessage:
         if reply_markup:
             data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
 
-        async with aiohttp.ClientSession() as client:
-            async with client.post(
-                self.api.format(self.bot_token, "copyMessage"),
-                data=data
-            ) as resp:
-                resp_json: dict = await resp.json()
-                if not resp_json.get("ok"):
-                    raise shitgram.exceptions.ApiException(
-                        dumps(resp_json, ensure_ascii=False)
-                    )
-                return  shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
+        session = await shitgram.bot.session_manager.get_session()
+        async with session.request(
+            method="post",
+            url=self.api.format(self.bot_token, "sendMessage"),
+            data=data,
+            timeout=aiohttp.ClientTimeout(total=timeout or 300)
+        ) as resp:
+            resp_json: dict = await resp.json()
+            if not resp_json.get("ok"):
+                raise shitgram.exceptions.ApiException(
+                    dumps(resp_json, ensure_ascii=False)
+                )
+            return  shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))

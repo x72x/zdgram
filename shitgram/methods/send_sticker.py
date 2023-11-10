@@ -1,7 +1,7 @@
 import aiohttp
 
 from json import dumps
-from typing import Union, List
+from typing import Union
 
 import shitgram
 
@@ -21,12 +21,16 @@ class SendSticker:
                 "shitgram.types.ForceReply",
                 "shitgram.types.ReplyKeyboardMarkup",
                 "shitgram.types.ReplyKeyboardRemove"
-            ] = None
+            ] = None,
+            timeout: int = None
     ) -> "shitgram.types.Message":
         data = {
             'chat_id': chat_id,
-            'sticker': sticker
         }
+        if isinstance(sticker, str):
+            data['sticker']=sticker
+        elif isinstance(sticker, shitgram.types.InputFile):
+            data['sticker']=sticker.get
         if message_thread_id:
             data['message_thread_id']=message_thread_id
         if emoji:
@@ -42,14 +46,16 @@ class SendSticker:
         if reply_markup:
             data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
 
-        async with aiohttp.ClientSession() as client:
-            async with client.post(
-                self.api.format(self.bot_token, "sendSticker"),
-                data=data
-            ) as resp:
-                resp_json: dict = await resp.json()
-                if not resp_json.get("ok"):
-                    raise shitgram.exceptions.ApiException(
-                        dumps(resp_json, ensure_ascii=False)
-                    )
-                return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
+        session = await shitgram.bot.session_manager.get_session()
+        async with session.request(
+            method="post",
+            url=self.api.format(self.bot_token, "sendMessage"),
+            data=data,
+            timeout=aiohttp.ClientTimeout(total=timeout or 300)
+        ) as resp:
+            resp_json: dict = await resp.json()
+            if not resp_json.get("ok"):
+                raise shitgram.exceptions.ApiException(
+                    dumps(resp_json, ensure_ascii=False)
+                )
+            return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))

@@ -25,54 +25,54 @@ class Message:
     author_signature: str
     text: str
     entities: List["shitgram.types.MessageEntity"]
-    animation: None
-    audio: None
-    document: None
-    photo: None
+    animation: "shitgram.types.Animation"
+    audio: "shitgram.types.Audio"
+    document: "shitgram.types.Document"
+    photo: List["shitgram.types.PhotoSize"]
     sticker: "shitgram.types.Sticker"
-    story: None
-    video: None
-    video_note: None
-    voice: None
+    story: "shitgram.types.Story"
+    video: "shitgram.types.Video"
+    video_note: "shitgram.types.VideoNote"
+    voice: "shitgram.types.Voice"
     caption: str
     caption_entities: list
     has_media_spoiler: bool
-    contact: None
-    dice: None
-    game: None
-    poll: None
-    venue: None
+    contact: "shitgram.types.Contact"
+    dice: "shitgram.types.Dice"
+    game: "shitgram.types.Game"
+    poll: "shitgram.types.Poll"
+    venue: "shitgram.types.Venue"
     location: "shitgram.types.Location"
     new_chat_members: list["shitgram.types.User"]
     left_chat_member: "shitgram.types.User"
     new_chat_title: str
-    new_chat_photo: list
+    new_chat_photo: List["shitgram.types.PhotoSize"]
     delete_chat_photo: bool
     group_chat_created: bool
     supergroup_chat_created: bool
     channel_chat_created: bool
-    message_auto_delete_timer_changed: None
+    message_auto_delete_timer_changed: "shitgram.types.MessageAutoDeleteTimerChanged"
     migrate_to_chat_id: int
     migrate_from_chat_id: int
     pinned_message: "Message"
-    invoice: None
-    successful_payment: None
+    invoice: "shitgram.types.Invoice"
+    successful_payment: "shitgram.types.SuccessfulPayment"
     user_shared: "shitgram.types.UserShared"
     chat_shared: "shitgram.types.ChatShared"
     connected_website: str
-    write_access_allowed: None
-    passport_data: None
-    proximity_alert_triggered: None
-    forum_topic_created: None
-    forum_topic_edited: None
-    forum_topic_closed: None
-    forum_topic_reopened: None
-    general_forum_topic_hidden: None
-    general_forum_topic_unhidden: None
-    video_chat_scheduled: None
-    video_chat_started: None
-    video_chat_ended: None
-    video_chat_participants_invited: None
+    write_access_allowed: "shitgram.types.WriteAccessAllowed"
+    passport_data: "shitgram.types.PassportData"
+    proximity_alert_triggered: "shitgram.types.ProximityAlertTriggered"
+    forum_topic_created: "shitgram.types.ForumTopicCreated"
+    forum_topic_edited: "shitgram.types.ForumTopicEdited"
+    forum_topic_closed: "shitgram.types.ForumTopicClosed"
+    forum_topic_reopened: "shitgram.types.ForumTopicReopened"
+    general_forum_topic_hidden: "shitgram.types.GeneralForumTopicHidden"
+    general_forum_topic_unhidden: "shitgram.types.GeneralForumTopicUnhidden"
+    video_chat_scheduled: "shitgram.types.VideoChatScheduled"
+    video_chat_started: "shitgram.types.VideoChatStarted"
+    video_chat_ended: "shitgram.types.VideoChatEnded"
+    video_chat_participants_invited: "shitgram.types.VideoChatParticipantsInvited"
     web_app_data: None
     reply_markup: "shitgram.types.InlineKeyboardMarkup"
 

@@ -1,6 +1,8 @@
 from typing import Union, List
 from .parser import Parser
 
+import shitgram
+
 class InlineKeyboardMarkup(
     Parser
 ):
@@ -8,6 +10,7 @@ class InlineKeyboardMarkup(
         self,
         inline_keyboard: List[List["InlineKeyboardButton"]]
     ) -> None:
+        super().__init__()
         self.inline_keyboard = inline_keyboard
 
 class InlineKeyboardButton(
@@ -19,14 +22,15 @@ class InlineKeyboardButton(
         url: str = None,
         callback_data: str = None,
         user_id: int = None,
-        web_app: Union[str, dict] =None,
-        login_url: Union[str, dict] = None,
+        web_app: "shitgram.types.WebAppInfo" =None,
+        login_url: "shitgram.types.LoginUrl" = None,
         switch_inline_query: str = None,
         switch_inline_query_current_chat: str = None,
-        switch_inline_query_chosen_chat: Union[str, dict] = None,
-        callback_game: Union[str, dict] = None,
+        switch_inline_query_chosen_chat: "shitgram.types.SwitchInlineQueryChosenChat" = None,
+        callback_game: "shitgram.types.CallbackGame" = None,
         pay: bool = None
     ) -> None:
+        super().__init__()
         self.text = text
         if url: self.url = url
         if callback_data: self.callback_data = callback_data

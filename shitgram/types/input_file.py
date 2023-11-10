@@ -4,9 +4,13 @@ class InputFile:
     def __init__(
             self,
             path: Union[str, bytes]
-        ) -> bytes:
-            if isinstance(path, bytes):
-                return path
-            else:
-                with open(path, 'rb') as f:
-                        return f.read()
+        ) -> None:
+            self.path = path
+
+    @property
+    def get(self):
+        if isinstance(self.path, str):
+            with open(self.path, 'rb') as f:
+                return f
+        elif isinstance(self.path, bytes):
+            return self.path

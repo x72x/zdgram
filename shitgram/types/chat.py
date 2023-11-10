@@ -9,7 +9,7 @@ class Chat:
     first_name: str
     last_name: str
     is_forum: bool
-    photo: None
+    photo: "shitgram.types.ChatPhoto"
     active_usernames: List[str]
     emoji_status_custom_emoji_id: str
     emoji_status_expiration_date: int
