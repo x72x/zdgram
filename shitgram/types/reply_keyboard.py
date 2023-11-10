@@ -1,7 +1,8 @@
-from typing import List, Union
+from typing import List
 from random import randint
 from .parser import Parser
-from .chat_administrator_rights import ChatAdministratorRights
+
+import shitgram
 
 class ReplyKeyboardMarkup(
     Parser
@@ -26,7 +27,7 @@ class ReplyKeyboardRemove(
 class KeyboardButton(
     Parser
 ):
-    def __init__(self, text: str, request_user: "KeyboardButtonRequestUser" = None, request_chat: "KeyboardButtonRequestChat" = None, request_contact: bool = None, request_location: bool = None, request_poll: "KeyboardButtonPollType" = None, web_app: Union["dict", "str"] = None):
+    def __init__(self, text: str, request_user: "KeyboardButtonRequestUser" = None, request_chat: "KeyboardButtonRequestChat" = None, request_contact: bool = None, request_location: bool = None, request_poll: "KeyboardButtonPollType" = None, web_app: "shitgram.types.WebAppInfo" = None):
         super().__init__()
         self.text = text
         if request_user is not None: self.request_user = request_user
@@ -48,7 +49,7 @@ class KeyboardButtonRequestUser(
 class KeyboardButtonRequestChat(
     Parser
 ):
-    def __init__(self, request_id: int = None, chat_is_channel: bool = False, chat_is_forum: bool = False, chat_has_username: bool = False, chat_is_created: bool = False, user_administrator_rights: "ChatAdministratorRights" = None, bot_administrator_rights: "ChatAdministratorRights" = None, bot_is_member: bool = False):
+    def __init__(self, request_id: int = None, chat_is_channel: bool = False, chat_is_forum: bool = False, chat_has_username: bool = False, chat_is_created: bool = False, user_administrator_rights: "shitgram.types.ChatAdministratorRights" = None, bot_administrator_rights: "shitgram.types.ChatAdministratorRights" = None, bot_is_member: bool = False):
         super().__init__()
         if bot_administrator_rights is not None: self.bot_administrator_rights = bot_administrator_rights
         if user_administrator_rights is not None: self.user_administrator_rights = user_administrator_rights

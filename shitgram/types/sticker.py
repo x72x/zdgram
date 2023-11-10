@@ -1,3 +1,4 @@
+import shitgram
 
 class Sticker:
     file_id: str
@@ -7,7 +8,8 @@ class Sticker:
     height: int
     is_animated: bool
     is_video: bool
-    thumbnail: None
+    thumbnail: "shitgram.types.PhotoSize"
+    thumb: "shitgram.types.PhotoSize"
     emoji: str
     set_name: str
     premium_animation: None

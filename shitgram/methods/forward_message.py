@@ -1,4 +1,3 @@
-import aiohttp
 import shitgram
 
 from typing import Union
@@ -27,16 +26,13 @@ class ForwardMessage:
         if protect_content:
             data['protect_content']=protect_content
 
-        session = await shitgram.bot.session_manager.get_session()
-        async with session.request(
-            method="post",
-            url=self.api.format(self.bot_token, "sendMessage"),
-            data=data,
-            timeout=aiohttp.ClientTimeout(total=timeout or 300)
-        ) as resp:
-            resp_json: dict = await resp.json()
-            if not resp_json.get("ok"):
-                raise shitgram.exceptions.ApiException(
-                    dumps(resp_json, ensure_ascii=False)
-                )
-            return  shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
+        resp_json = await self.sendRequest(
+            method_name="forwardMessage",
+            params=data,
+            timeout=timeout
+        )
+        if not resp_json.get("ok"):
+            raise shitgram.exceptions.ApiException(
+                dumps(resp_json, ensure_ascii=False)
+            )
+        return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))

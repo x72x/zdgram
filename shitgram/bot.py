@@ -50,7 +50,9 @@ class Bot(Methods, Handlers):
         self.__message_handlers = []
         self.__edited_message_handlers = []
         self.__callback_query_handlers = []
-        self._cache_infos = {}
+        self.__channel_post_handlers = []
+        self.__edited_channel_post_handlers = []
+        self.cache = {}
         self.api = api_url or API_URL
 
         try:
@@ -66,65 +68,54 @@ class Bot(Methods, Handlers):
 
     async def get_updates(self):
         while True:
-            session = await session_manager.get_session()
-            async with session.request(
-                    method="post",
-                    url=self.api.format(self.bot_token, "getUpdates"),
-                    data=self.getUpdatesData,
-                    timeout=aiohttp.ClientTimeout(total=300)
-            ) as resp:
-                    updates = await resp.json()
-                    for update in updates.get("result"):
-                        if not self.__cache:
-                            self.__cache.append(update.get("update_id"))
-                            logging.info("getUpdates running now")
-                            continue
-                        if update.get("update_id") not in self.__cache:
-                            self.__cache.append(update.get("update_id"))
-                            upd = Update()._parse(update)
-                            for func in self.__funcs:
-                                # await self.loop.run_in_executor(
-                                #     None,
-                                #     func=lambda: self.loop.create_task(func(self, upd))
-                                # )
-                                self.loop.create_task(func['func'](self, upd))
-
-                            if upd.message and not upd.message.edit_date:
-                                for func in self.__message_handlers:
-                                    if (func['filter_func']) and not func['filter_func'](upd.message):
-                                        continue
-                                    else:
-                                        # await self.loop.run_in_executor(
-                                        #     None,
-                                        #     func=lambda: self.loop.create_task(func['func'](self, upd.message))
-                                        # )
-                                        self.loop.create_task(func['func'](self, upd.message))
-
-                            if upd.message and upd.message.edit_date:
-                                for func in self.__edited_message_handlers:
-                                    if (func['filter_func']) and not func['filter_func'](upd.message):
-                                        continue
-                                    else:
-                                        # await self.loop.run_in_executor(
-                                        #     None,
-                                        #     func=lambda: self.loop.create_task(func['func'](self, upd.message))
-                                        # )
-                                        self.loop.create_task(func['func'](self, upd.message))
-
-                            if upd.callback_query:
-                                for func in self.__callback_query_handlers:
-                                    if (func['filter_func']) and not func['filter_func'](upd.callback_query):
-                                        continue
-                                    else:
-                                        # await self.loop.run_in_executor(
-                                        #     None,
-                                        #     func=lambda: self.loop.create_task(func['func'](self, upd.callback_query))
-                                        # )
-                                        self.loop.create_task(func['func'](self, upd.callback_query))
+            updates = await self.sendRequest(
+                method_name="getUpdates",
+                params=self.getUpdatesData
+            )
+            for update in updates.get("result"):
+                if not self.__cache:
+                    self.__cache.append(update.get("update_id"))
+                    logging.info("getUpdates running now")
+                    continue
+                if update.get("update_id") not in self.__cache:
+                    self.__cache.append(update.get("update_id"))
+                    upd = Update()._parse(update)
+                    for func in self.__funcs:
+                        self.loop.create_task(func['func'](self, upd))
+                    if update.get("message"):
+                        for func in self.__message_handlers:
+                            if (func['filter_func']) and not func['filter_func'](upd.message):
+                                continue
+                            else:
+                                self.loop.create_task(func['func'](self, upd.message))
+                    if update.get("edited_message"):
+                        for func in self.__edited_message_handlers:
+                            if (func['filter_func']) and not func['filter_func'](upd.message):
+                                continue
+                            else:
+                                self.loop.create_task(func['func'](self, upd.message))
+                    if update.get("callback_query"):
+                        for func in self.__callback_query_handlers:
+                            if (func['filter_func']) and not func['filter_func'](upd.callback_query):
+                                continue
+                            else:
+                                self.loop.create_task(func['func'](self, upd.callback_query))
+                    if update.get("channel_post"):
+                        for func in self.__channel_post_handlers:
+                            if (func['filter_func']) and not func['filter_func'](upd.message):
+                                continue
+                            else:
+                                self.loop.create_task(func['func'](self, upd.message))
+                    if update.get("edited_channel_post"):
+                        for func in self.__edited_channel_post_handlers:
+                            if (func['filter_func']) and not func['filter_func'](upd.message):
+                                continue
+                            else:
+                                self.loop.create_task(func['func'](self, upd.message))
 
     async def auto_clean_cache(self):
         while not await asyncio.sleep(500):
-            self.__cache_infos.clear()
+            self.cache.clear()
 
     def add_any_update_handler(self, func: Callable) -> Callable:
         self.__funcs.append(func)
@@ -147,6 +138,22 @@ class Bot(Methods, Handlers):
 
     def add_message_handler(self, func_: Callable, func: Callable = None) -> Callable:
         self.__message_handlers.append(
+            {
+                "func": func_,
+                "filter_func": func
+            }
+        )
+
+    def add_channel_post_handler(self, func_: Callable, func: Callable = None) -> Callable:
+        self.__channel_post_handlers.append(
+            {
+                "func": func_,
+                "filter_func": func
+            }
+        )
+
+    def add_edited_channel_post_handler(self, func_: Callable, func: Callable = None) -> Callable:
+        self.__edited_channel_post_handlers.append(
             {
                 "func": func_,
                 "filter_func": func

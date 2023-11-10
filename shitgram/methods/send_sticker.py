@@ -27,10 +27,13 @@ class SendSticker:
         data = {
             'chat_id': chat_id,
         }
+        is_file = False
         if isinstance(sticker, str):
             data['sticker']=sticker
         elif isinstance(sticker, shitgram.types.InputFile):
-            data['sticker']=sticker.get
+            is_file = True
+        elif isinstance(sticker, bytes):
+            is_file = True
         if message_thread_id:
             data['message_thread_id']=message_thread_id
         if emoji:
@@ -46,16 +49,23 @@ class SendSticker:
         if reply_markup:
             data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
 
-        session = await shitgram.bot.session_manager.get_session()
-        async with session.request(
-            method="post",
-            url=self.api.format(self.bot_token, "sendMessage"),
-            data=data,
-            timeout=aiohttp.ClientTimeout(total=timeout or 300)
-        ) as resp:
-            resp_json: dict = await resp.json()
-            if not resp_json.get("ok"):
-                raise shitgram.exceptions.ApiException(
-                    dumps(resp_json, ensure_ascii=False)
-                )
-            return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
+        if is_file:
+            resp_json = await self.sendRequest(
+                method_name="sendSticker",
+                params=data,
+                timeout=timeout,
+                files={
+                    "sticker": sticker
+                }
+            )
+        else:
+            resp_json = await self.sendRequest(
+                method_name="sendSticker",
+                params=data,
+                timeout=timeout
+            )
+        if not resp_json.get("ok"):
+            raise shitgram.exceptions.ApiException(
+                dumps(resp_json, ensure_ascii=False)
+            )
+        return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))

@@ -48,16 +48,14 @@ class SendMessage:
             data['allow_sending_without_reply']=allow_sending_without_reply
         if reply_markup:
             data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
-        session = await shitgram.bot.session_manager.get_session()
-        async with session.request(
-            method="post",
-            url=self.api.format(self.bot_token, "sendMessage"),
-            data=data,
-            timeout=aiohttp.ClientTimeout(total=timeout or 300)
-        ) as resp:
-            resp_json: dict = await resp.json()
-            if not resp_json.get("ok"):
-                raise shitgram.exceptions.ApiException(
-                    dumps(resp_json, ensure_ascii=False)
-                )
-            return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
+
+        resp_json = await self.sendRequest(
+            method_name="sendMessage",
+            params=data,
+            timeout=timeout
+        )
+        if not resp_json.get("ok"):
+            raise shitgram.exceptions.ApiException(
+                dumps(resp_json, ensure_ascii=False)
+            )
+        return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
