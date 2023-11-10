@@ -1,7 +1,9 @@
 import shitgram
 import aiohttp
 import os
+import logging
 
+from json import dumps
 
 def _prepare_file(obj):
     """
@@ -49,6 +51,21 @@ class SendRequest:
             files=None,
             timeout: int = None,
     ) -> dict:
+        if method_name.lower() != "getupdates":
+            logging.info(
+                "   Sending request : \n {}".format(
+                    dumps(
+                        {
+                            "method_name": method_name,
+                            "params": params,
+                            "files": True if files else None,
+                            "timeout": timeout
+                        },
+                        indent=4,
+                        ensure_ascii=False
+                    )
+                )
+            )
         if params and params.get("chat_id"):
             params.update({"chat_id": str(params.get("chat_id"))})
         if files:
@@ -60,4 +77,14 @@ class SendRequest:
             data=params,
             timeout=aiohttp.ClientTimeout(total=timeout or 300)
         ) as resp:
-                return await resp.json()
+            if method_name.lower() != "getupdates":
+                logging.info(
+                    "   Response information : \n {}".format(
+                        dumps(
+                            await resp.json(),
+                            indent=4,
+                            ensure_ascii=False
+                        )
+                    )
+                )
+            return await resp.json()

@@ -1,5 +1,3 @@
-import aiohttp
-
 from json import dumps
 from typing import Union, List
 
@@ -35,7 +33,7 @@ class SendMessage:
         if parse_mode:
             data['parse_mode']=parse_mode
         if entities:
-            data['entities']=dumps([i.__dict__.get("_dtc__dict") for i in entities], ensure_ascii=False)
+            data['entities']=dumps([str(i) if isinstance(i, shitgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in entities], ensure_ascii=False)
         if disable_web_page_preview:
             data['disable_web_page_preview']=disable_web_page_preview
         if disable_notification:

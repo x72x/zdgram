@@ -1,10 +1,25 @@
-from . import types
-from typing import Union
+from . import types, Bot
+from typing import Union, List
 from json import dumps
 
 import os
 import aiohttp
 import asyncio
+
+async def run_multiple_bots(bots: List["Bot"]):
+    tasks = []
+    while True:
+        for i in bots:
+            try:
+                task = asyncio.create_task(i.start_polling())
+                tasks.append(task)
+            except:
+                pass
+        try:
+            await asyncio.wait(tasks)
+        except asyncio.CancelledError:
+            tasks.clear()
+            pass
 
 def reply_markup_parse(
         reply_markup: Union["str", "dict", "types.InlineKeyboardMarkup", "types.ForceReply"]

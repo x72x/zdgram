@@ -1,4 +1,3 @@
-import aiohttp
 import shitgram
 
 from json import dumps

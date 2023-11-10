@@ -4,6 +4,7 @@ from .forward_message import ForwardMessage
 from .get_me import GetMe
 from .copy_message import CopyMessage
 from .send_sticker import SendSticker
+from .send_photo import SendPhoto
 
 class Methods(
     SendMessage,
@@ -11,6 +12,7 @@ class Methods(
     ForwardMessage,
     GetMe,
     CopyMessage,
-    SendSticker
+    SendSticker,
+    SendPhoto
 ):
     pass

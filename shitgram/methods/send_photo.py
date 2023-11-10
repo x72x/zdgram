@@ -1,14 +1,17 @@
 from json import dumps
-from typing import Union
+from typing import Union, List
 
 import shitgram
 
-class SendSticker:
-    async def sendSticker(
+class SendPhoto:
+    async def sendPhoto(
             self: "shitgram.Bot",
             chat_id: Union[int, str],
-            sticker: Union["shitgram.types.InputFile", str],
-            emoji: str = None,
+            photo: Union["shitgram.types.InputFile", str],
+            caption: str = None,
+            parse_mode: str = None,
+            caption_entities: List["shitgram.types.MessageEntity"] = None,
+            has_spoiler: bool = None,
             message_thread_id: int = None,
             disable_notification: bool = None,
             protect_content: bool = None,
@@ -26,16 +29,25 @@ class SendSticker:
             'chat_id': chat_id,
         }
         is_file = False
-        if isinstance(sticker, str):
-            data['sticker']=sticker
-        elif isinstance(sticker, shitgram.types.InputFile):
+        if isinstance(photo, str):
+            data['photo']=photo
+        elif isinstance(photo, shitgram.types.InputFile):
             is_file = True
-        elif isinstance(sticker, bytes):
+        elif isinstance(photo, bytes):
             is_file = True
+        if caption:
+            data['caption']=caption
+        if parse_mode:
+            data['parse_mode']=parse_mode
+        if caption_entities:
+            if isinstance(caption_entities[0], shitgram.types.MessageEntity):
+                data['caption_entities']=dumps([i.__dict__ for i in caption_entities], ensure_ascii=False)
+            else:
+                data['caption_entities']=dumps([i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False)
+        if has_spoiler:
+            data['has_spoiler']=has_spoiler
         if message_thread_id:
             data['message_thread_id']=message_thread_id
-        if emoji:
-            data['emoji']=emoji
         if disable_notification:
             data['disable_notification']=disable_notification
         if protect_content:
@@ -49,16 +61,16 @@ class SendSticker:
 
         if is_file:
             resp_json = await self.sendRequest(
-                method_name="sendSticker",
+                method_name="sendPhoto",
                 params=data,
                 timeout=timeout,
                 files={
-                    "sticker": sticker
+                    "photo": photo
                 }
             )
         else:
             resp_json = await self.sendRequest(
-                method_name="sendSticker",
+                method_name="sendPhoto",
                 params=data,
                 timeout=timeout
             )
