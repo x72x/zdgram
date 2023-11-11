@@ -18,3 +18,6 @@ class Parser:
 
     def __str__(self) -> str:
         return dumps(self, indent=4, default=Parser.__default__, ensure_ascii=False)
+
+    def __repr__(self) -> str:
+        return "\n"+dumps(self, indent=4, default=Parser.__default__, ensure_ascii=False)
