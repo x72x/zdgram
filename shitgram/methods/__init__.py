@@ -5,6 +5,7 @@ from .get_me import GetMe
 from .copy_message import CopyMessage
 from .send_sticker import SendSticker
 from .send_photo import SendPhoto
+from .send_media_group import SendMediaGroup
 
 class Methods(
     SendMessage,
@@ -13,6 +14,7 @@ class Methods(
     GetMe,
     CopyMessage,
     SendSticker,
-    SendPhoto
+    SendPhoto,
+    SendMediaGroup
 ):
     pass

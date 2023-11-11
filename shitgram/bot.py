@@ -51,6 +51,8 @@ class Bot(Methods, Handlers):
         self.__message_handlers = []
         self.__edited_message_handlers = []
         self.__callback_query_handlers = []
+        self.__inline_query_handlers = []
+        self.__chosen_inline_result_handlers = []
         self.__channel_post_handlers = []
         self.__edited_channel_post_handlers = []
         self.cache = {}
@@ -126,6 +128,30 @@ class Bot(Methods, Handlers):
                                 )
                             )
                             asyncio.create_task(func['func'](self, upd.callback_query))
+                if update.get("inline_query"):
+                    for func in self.__inline_query_handlers:
+                        if (func['filter_func']) and not func['filter_func'](upd.inline_query):
+                            continue
+                        else:
+                            logging.info(
+                                "   Creating TASK into {} , handler : {}".format(
+                                    func['func'].__name__,
+                                    "onInlineQuery"
+                                )
+                            )
+                            asyncio.create_task(func['func'](self, upd.inline_query))
+                if update.get("chosen_inline_result"):
+                    for func in self.__chosen_inline_result_handlers:
+                        if (func['filter_func']) and not func['filter_func'](upd.chosen_inline_result):
+                            continue
+                        else:
+                            logging.info(
+                                "   Creating TASK into {} , handler : {}".format(
+                                    func['func'].__name__,
+                                    "onChosenInlineResult"
+                                )
+                            )
+                            asyncio.create_task(func['func'](self, upd.chosen_inline_result))
                 if update.get("channel_post"):
                     for func in self.__channel_post_handlers:
                         if (func['filter_func']) and not func['filter_func'](upd.message):
@@ -178,6 +204,34 @@ class Bot(Methods, Handlers):
         )
         logging.info(
             "   Added {} to callback_query handlers at {}".format(
+                func_.__name__,
+                self.id
+            )
+        )
+
+    def add_inline_query_handler(self, func_: Callable, func: Callable = None):
+        self.__inline_query_handlers.append(
+            {
+                "func": func_,
+                "filter_func": func
+            }
+        )
+        logging.info(
+            "   Added {} to inline_query handlers at {}".format(
+                func_.__name__,
+                self.id
+            )
+        )
+
+    def add_chosen_inline_result_handler(self, func_: Callable, func: Callable = None):
+        self.__chosen_inline_result_handlers.append(
+            {
+                "func": func_,
+                "filter_func": func
+            }
+        )
+        logging.info(
+            "   Added {} to chosen_inline_result handlers at {}".format(
                 func_.__name__,
                 self.id
             )

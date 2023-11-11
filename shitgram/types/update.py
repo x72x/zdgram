@@ -29,7 +29,8 @@ class DictionaryToClass(Parser):
 class Update:
     message: "shitgram.types.Message"
     callback_query: "shitgram.types.CallbackQuery"
-
+    inline_query: "shitgram.types.InlineQuery"
+    chosen_inline_result: "shitgram.types.ChosenInlineResult"
     def _parse(self, dt: dict) -> "Update":
         for i in dt:
             if (

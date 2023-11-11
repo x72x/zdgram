@@ -65,3 +65,11 @@ from .web_app import WebAppData, WebAppInfo
 from .login_url import LoginUrl
 from .switch_inline_query_chosen_chat import SwitchInlineQueryChosenChat
 from .callback_game import CallbackGame
+from .input_media import (
+    InputMediaAnimation,
+    InputMediaVideo,
+    InputMediaAudio,
+    InputMediaPhoto,
+    InputMediaDocument
+)
+from .inline_query import InlineQuery, ChosenInlineResult

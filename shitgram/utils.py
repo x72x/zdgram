@@ -1,10 +1,45 @@
 from . import types, Bot
 from typing import Union, List
-from json import dumps
+from json import dumps, loads
 
 import os
 import aiohttp
 import asyncio
+
+async def convert_input_media_array(array):
+    media = []
+    files = {}
+    for input_media in array:
+            media_dict = loads(str(input_media))
+            if media_dict['media'].startswith('attach://'):
+                key = media_dict['media'].replace('attach://', '')
+                files[key] = input_media.media
+            media.append(media_dict)
+    return dumps(media), files
+
+async def send_media_group(
+        bot: "Bot", chat_id, media,
+        disable_notification=None, reply_to_message_id=None,
+        timeout=None, allow_sending_without_reply=None, protect_content=None, message_thread_id=None):
+    method_name = "sendMediaGroup"
+    media_json, files = await convert_input_media_array(media)
+    payload = {'chat_id': chat_id, 'media': media_json}
+    if disable_notification is not None:
+        payload['disable_notification'] = disable_notification
+    if reply_to_message_id:
+        payload['reply_to_message_id'] = reply_to_message_id
+    if timeout:
+        payload['timeout'] = timeout
+    if allow_sending_without_reply is not None:
+        payload['allow_sending_without_reply'] = allow_sending_without_reply
+    if protect_content is not None:
+        payload['protect_content'] = protect_content
+    if message_thread_id:
+        payload['message_thread_id'] = message_thread_id
+    return await bot.sendRequest(
+        method_name, params=payload,
+        files=files if files else None
+    )
 
 async def run_multiple_bots(bots: List["Bot"]):
     tasks = []

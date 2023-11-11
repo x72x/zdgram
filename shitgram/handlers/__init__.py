@@ -4,6 +4,8 @@ from .on_edited_message import OnEditedMessage
 from .on_callback_query import OnCallbackQuery
 from .on_channel_post import OnChannelPost
 from .on_edited_channel_post import OnEditedChannelPost
+from .on_inline_query import OnInlineQuery
+from .on_chosen_inline_result import OnChosenInlineResult
 
 class Handlers(
     OnMessage,
@@ -11,6 +13,8 @@ class Handlers(
     OnEditedMessage,
     OnCallbackQuery,
     OnChannelPost,
-    OnEditedChannelPost
+    OnEditedChannelPost,
+    OnInlineQuery,
+    OnChosenInlineResult
 ):
     pass

@@ -51,22 +51,17 @@ bot2 = Bot("5860767186:AAF32kvjD6--ZWqszgsIS8AjIeH9mAnIM9E")
 @bot2.onMessage()
 @bot2.onEditedMessage()
 async def bot2_test(_: Bot, m: types.Message):
-    # await _.copyMessage(
-    #     m.chat.id,
-    #     m.chat.id,
-    #     m.id,
-    #     reply_to_message_id=m.id,
-    #     reply_markup=types.InlineKeyboardMarkup(
-    #         [
-    #             [
-    #                 types.InlineKeyboardButton(
-    #                     "Hi",
-    #                     switch_inline_query_chosen_chat=types.SwitchInlineQueryChosenChat()
-    #                 )
-    #             ]
-    #         ]
-    #     )
-    # )
+    msgs = await bot2.sendMediaGroup(
+        m.chat.id,
+        media=[
+            types.InputMediaDocument("https://t.me/D7BotResources/166"),
+            types.InputMediaDocument("https://t.me/D7BotResources/163")
+        ]
+    )
+    print(msgs)
+
+@bot2.onInlineQuery()
+async def bot2tes2(_, m: types.InlineQuery):
     print(m)
 
 @bot.onChannelPost()
