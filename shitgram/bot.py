@@ -90,8 +90,6 @@ class Bot(Methods, Handlers):
                     asyncio.create_task(func['func'](self, upd))
                 if update.get("message"):
                     for func in self.__message_handlers:
-                        if not asyncio.iscoroutinefunction(func['func']):
-                            continue
                         if (func['filter_func']) and not func['filter_func'](upd.message):
                             continue
                         else:
@@ -104,8 +102,6 @@ class Bot(Methods, Handlers):
                             asyncio.create_task(func['func'](self, upd.message))
                 if update.get("edited_message"):
                     for func in self.__edited_message_handlers:
-                        if not asyncio.iscoroutinefunction(func['func']):
-                            continue
                         if (func['filter_func']) and not func['filter_func'](upd.message):
                             continue
                         else:
