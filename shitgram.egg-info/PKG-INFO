@@ -1,6 +1,26 @@
+Metadata-Version: 2.1
+Name: shitgram
+Version: 0.1.dev4
+Summary: Python module based on https://core.telegram.org/bots/api
+Author: ZAID
+Author-email: y8838@hotmail.com
+Keywords: bots,bot-api,telegram
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Requires-Python: ~=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: asyncio
+Requires-Dist: aiohttp
+
+
 # Install :
 ```commandline
-pip install shitgram==0.1.dev5
+pip install shitgram==0.1.dev4
 ```
 
 # How to use?
@@ -26,11 +46,11 @@ async def on_updates(bot: Bot, update: types.Update):
 - message and edited_message:
 ```python
 @bot.onMessage()
-async def on_message(bot: Bot, message: types.Message):
+async def on_message(bot: Bot, message: types.Update):
     print(message)
 
 @bot.onEditedMessage()
-async def on_edited_message(bot: Bot, message: types.Message):
+async def on_edited_message(bot: Bot, message: types.Update):
     print(message)
 
 # Custom filter
