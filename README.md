@@ -1,6 +1,6 @@
 # Install :
 ```commandline
-pip install shitgram==0.1.dev5
+pip install shitgram==0.1.dev6
 ```
 
 # How to use?
@@ -53,7 +53,7 @@ async def echo(bot: Bot, message: types.Message):
     )
 ```
 
-- Callback Queries ( No CallbackQuery Methods currently )
+- Callback Queries ~~( No CallbackQuery Methods currently )~~
 ```python
 @bot.onCallbackQuery()
 async def on_callback_query(bot: Bot, callback_query: types.CallbackQuery):
