@@ -52,8 +52,4 @@ class SendMessage:
             params=data,
             timeout=timeout
         )
-        if not resp_json.get("ok"):
-            raise shitgram.exceptions.ApiException(
-                dumps(resp_json, ensure_ascii=False)
-            )
         return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))

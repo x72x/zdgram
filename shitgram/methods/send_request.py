@@ -77,14 +77,19 @@ class SendRequest:
             data=params,
             timeout=aiohttp.ClientTimeout(total=timeout or 300)
         ) as resp:
+            resp_json = await resp.json()
             if method_name.lower() != "getupdates":
                 logging.info(
                     "   Response information : \n {}".format(
                         dumps(
-                            await resp.json(),
+                            resp_json,
                             indent=4,
                             ensure_ascii=False
                         )
                     )
                 )
-            return await resp.json()
+            if not resp_json.get("ok"):
+                raise shitgram.exceptions.ApiException(
+                    dumps(resp_json, ensure_ascii=False)
+                )
+            return resp_json

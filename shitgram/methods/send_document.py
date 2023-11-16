@@ -1,15 +1,20 @@
-from typing import Union
+from json import dumps
+from typing import Union, List
 
 import shitgram
 
-class SendSticker:
-    async def sendSticker(
+class SendDocument:
+    async def sendDocument(
             self: "shitgram.Bot",
             chat_id: Union[int, str],
-            sticker: Union["shitgram.types.InputFile", str, bytes],
-            emoji: str = None,
+            document: Union["shitgram.types.InputFile", str, bytes],
+            caption: str = None,
+            parse_mode: str = None,
+            caption_entities: List["shitgram.types.MessageEntity"] = None,
+            thumbnail: Union["shitgram.types.InputFile", str] = None,
             message_thread_id: int = None,
             disable_notification: bool = None,
+            disable_content_type_detection: bool = None,
             protect_content: bool = None,
             reply_to_message_id: int = None,
             allow_sending_without_reply: bool = None,
@@ -24,17 +29,25 @@ class SendSticker:
         data = {
             'chat_id': chat_id,
         }
+        files = {}
         is_file = False
-        if isinstance(sticker, str):
-            data['sticker']=sticker
-        elif isinstance(sticker, shitgram.types.InputFile):
+        if isinstance(document, str):
+            data["document"]=document
+        elif isinstance(document, shitgram.types.InputFile):
             is_file = True
-        elif isinstance(sticker, bytes):
+        elif isinstance(document, bytes):
             is_file = True
+        if caption:
+            data['caption']=caption
+        if parse_mode:
+            data['parse_mode']=parse_mode
+        if caption_entities:
+            if isinstance(caption_entities[0], shitgram.types.MessageEntity):
+                data['caption_entities']=dumps([i.__dict__ for i in caption_entities], ensure_ascii=False)
+            else:
+                data['caption_entities']=dumps([i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False)
         if message_thread_id:
             data['message_thread_id']=message_thread_id
-        if emoji:
-            data['emoji']=emoji
         if disable_notification:
             data['disable_notification']=disable_notification
         if protect_content:
@@ -45,19 +58,22 @@ class SendSticker:
             data['allow_sending_without_reply']=allow_sending_without_reply
         if reply_markup:
             data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
+        if disable_content_type_detection:
+            data["disable_content_type_detection"]=disable_content_type_detection
 
         if is_file:
+            files["document"]=document
+            if thumbnail:
+                files["thumbnail"]=thumbnail
             resp_json = await self.sendRequest(
-                method_name="sendSticker",
+                method_name="sendDocument",
                 params=data,
                 timeout=timeout,
-                files={
-                    "sticker": sticker
-                }
+                files=files
             )
         else:
             resp_json = await self.sendRequest(
-                method_name="sendSticker",
+                method_name="sendDocument",
                 params=data,
                 timeout=timeout
             )
