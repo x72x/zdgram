@@ -37,7 +37,7 @@ from .venue import Venue
 from .photosize import PhotoSize
 from .message_auto_delete_timer_changed import MessageAutoDeleteTimerChanged
 from .invoice import Invoice
-from .payments import SuccessfulPayment, ShippingAddress, OrderInfo
+from .payments import SuccessfulPayment, ShippingAddress, OrderInfo, ShippingQuery, PreCheckoutQuery
 from .write_access_allowed import WriteAccessAllowed
 from .chat_photo import ChatPhoto
 from .passport import (
@@ -73,3 +73,6 @@ from .input_media import (
     InputMediaDocument
 )
 from .inline_query import InlineQuery, ChosenInlineResult
+from .chat_invite_link import ChatInviteLink
+from .chat_member import ChatMember, ChatMemberUpdated
+from .chat_join_request import ChatJoinRequest

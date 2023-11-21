@@ -2,12 +2,18 @@ from typing import Union
 
 import shitgram
 
-class SendSticker:
-    async def sendSticker(
+class SendVenue:
+    async def sendVenue(
             self: "shitgram.Bot",
             chat_id: Union[int, str],
-            sticker: Union["shitgram.types.InputFile", str, bytes],
-            emoji: str = None,
+            latitude: float,
+            longitude: float,
+            title: str,
+            address: str,
+            foursquare_id: str = None,
+            foursquare_type: str = None,
+            google_place_id: str = None,
+            google_place_type: str = None,
             message_thread_id: int = None,
             disable_notification: bool = None,
             protect_content: bool = None,
@@ -22,11 +28,17 @@ class SendSticker:
             timeout: int = None
     ) -> "shitgram.types.Message":
         """
-        Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
+        Use this method to send information about a venue. On success, the sent Message is returned.
 
         :param chat_id: Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-        :param sticker: Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP or .TGS sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files ». Video stickers can only be sent by a file_id. Animated stickers can't be sent via an HTTP URL.
-        :param emoji: Emoji associated with the sticker; only for just uploaded stickers
+        :param latitude: Latitude of the venue
+        :param longitude: Longitude of the venue
+        :param title: Name of the venue
+        :param address: Address of the venue
+        :param foursquare_id: Foursquare identifier of the venue
+        :param foursquare_type: Foursquare type of the venue, if known. (For example, “arts_entertainment/default”, “arts_entertainment/aquarium” or “food/icecream”.)
+        :param google_place_id: Google Places identifier of the venue
+        :param google_place_type: Google Places type of the venue. (See supported types at : https://developers.google.com/places/web-service/supported_types .)
         :param message_thread_id: Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
         :param disable_notification: Sends the message silently. Users will receive a notification with no sound.
         :param protect_content: Protects the contents of the sent message from forwarding and saving
@@ -38,22 +50,25 @@ class SendSticker:
         """
         data = {
             'chat_id': chat_id,
+            'latitude': latitude,
+            'longitude': longitude,
+            'title': title,
+            'address': address
         }
-        is_file = False
-        if isinstance(sticker, str):
-            data['sticker']=sticker
-        elif isinstance(sticker, shitgram.types.InputFile):
-            is_file = True
-        elif isinstance(sticker, bytes):
-            is_file = True
         if self.protect_content:
             data['protect_content']=self.protect_content
         if self.disable_notification:
             data['disable_notification']=self.disable_notification
+        if foursquare_id is not None:
+            data["foursquare_id"]=foursquare_id
+        if foursquare_type is not None:
+            data["foursquare_type"]=foursquare_type
+        if google_place_id is not None:
+            data["google_place_id"]=google_place_id
+        if google_place_type is not None:
+            data["google_place_type"]=google_place_type
         if message_thread_id:
             data['message_thread_id']=message_thread_id
-        if emoji:
-            data['emoji']=emoji
         if disable_notification is not None:
             data['disable_notification']=disable_notification
         if protect_content is not None:
@@ -65,21 +80,11 @@ class SendSticker:
         if reply_markup:
             data['reply_markup']=shitgram.utils.reply_markup_parse(reply_markup)
 
-        if is_file:
-            resp_json = await self.sendRequest(
-                method_name="sendSticker",
-                params=data,
-                timeout=timeout,
-                files={
-                    "sticker": sticker
-                }
-            )
-        else:
-            resp_json = await self.sendRequest(
-                method_name="sendSticker",
-                params=data,
-                timeout=timeout
-            )
+        resp_json = await self.sendRequest(
+            method_name="sendLocation",
+            params=data,
+            timeout=timeout
+        )
         return shitgram.bot.update_manager._parse(shitgram.bot.message_manager._parse(resp_json.get("result")))
 
-    send_sticker = sendSticker
+    send_venue = sendVenue

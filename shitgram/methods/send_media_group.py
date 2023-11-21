@@ -25,7 +25,6 @@ class SendMediaGroup:
         """
         Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Messages that were sent is returned.
 
-
         :param chat_id: Unique identifier for the target chat or username of the target channel (in the format @channelusername)
         :param media: A JSON-serialized array describing messages to be sent, must include 2-10 items
         :param message_thread_id: Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -36,6 +35,10 @@ class SendMediaGroup:
         :param timeout: Request TimeOut
         :return: On success, an array of Messages that were sent is returned.
         """
+        if self.protect_content and protect_content is None:
+            protect_content=self.protect_content
+        if self.disable_notification and disable_notification is None:
+            disable_notification=self.disable_notification
         result = await shitgram.utils.send_media_group(
             self,
             chat_id=chat_id,
@@ -47,4 +50,6 @@ class SendMediaGroup:
             message_thread_id=message_thread_id,
             timeout=timeout
         )
-        return [shitgram.types.Update()._parse(shitgram.types.Message()._parse(i)) for i in result.get("result")]
+        return [shitgram.bot.update_manager._parse(shitgram.bot.message_manager._parse(i)) for i in result.get("result")]
+
+    send_media_group = sendMediaGroup

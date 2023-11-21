@@ -1,10 +1,11 @@
-from . import types, Bot
+from . import types
 from typing import Union, List
 from json import dumps, loads
 
 import os
 import aiohttp
 import asyncio
+import shitgram
 
 async def convert_input_media_array(array):
     media = []
@@ -18,7 +19,7 @@ async def convert_input_media_array(array):
     return dumps(media), files
 
 async def send_media_group(
-        bot: "Bot", chat_id, media,
+        bot: "shitgram.Bot", chat_id, media,
         disable_notification=None, reply_to_message_id=None,
         timeout=None, allow_sending_without_reply=None, protect_content=None, message_thread_id=None):
     method_name = "sendMediaGroup"
@@ -41,7 +42,7 @@ async def send_media_group(
         files=files if files else None
     )
 
-async def run_multiple_bots(bots: List["Bot"]):
+async def run_multiple_bots(bots: List["shitgram.Bot"]):
     tasks = []
     while True:
         for i in bots:
@@ -118,3 +119,20 @@ async def upload_files(file_path, file, server_url, session: aiohttp.ClientSessi
             status = response.status
             body = await response.json()
             return body
+
+all_updates = [
+    "message",
+    "edited_message",
+    "channel_post",
+    "edited_channel_post",
+    "inline_query",
+    "chosen_inline_result",
+    "callback_query",
+    "shipping_query",
+    "pre_checkout_query",
+    "poll",
+    "poll_answer",
+    "my_chat_member",
+    "chat_member",
+    "chat_join_request"
+]

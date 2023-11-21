@@ -8,3 +8,6 @@ class OnInlineQuery:
             self.add_inline_query_handler(func_, func)
             return func_
         return decorator
+
+    def on_inline_query(self: "shitgram.Bot", func: Callable = None):
+        return self.onInlineQuery(func)

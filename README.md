@@ -1,6 +1,6 @@
 # Install :
 ```commandline
-pip install shitgram==0.1.dev6
+pip install shitgram==0.1.dev7
 ```
 
 # How to use?
@@ -11,7 +11,7 @@ from shitgram import Bot, types
 
 API_TOKEN = "API_TOKEN_HERE"
 
-bot = Bot(API_TOKEN)
+bot = Bot(API_TOKEN, allowed_updates=["message"])
 ```
 
 - Add handlers to recive updates from telegram:
@@ -73,21 +73,16 @@ async def on_inline_query(bot: Bot, inline_query: types.InlineQuery):
 - Start the bot:
 ---
 ```python
-import asyncio
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-asyncio.run(bot.start_polling())
-
-# add allowed updates:
-asyncio.run(bot.start_polling(allowed_updates=["message"]))
+bot.run()
 ```
 
 - Start multiple bots:
 ---
 ```python
-import asyncio
 import logging
 
 from shitgram import run_multiple_bots, Bot, types, enums
@@ -106,7 +101,31 @@ async  def on_message(bot: Bot, message: types.Message):
         parse_mode=enums.ParseMode.MARKDOWN
     )
 
-asyncio.run(run_multiple_bots([bot_1, bot_2]))
+bot_1.run(run_multiple_bots([bot_1, bot_2]))
+```
+
+- Create Listener ( Conversation ):
+---
+```python
+from shitgram import types, enums, Bot
+
+bot = Bot(bot_token="")
+
+def filter_text_and_private(m: types.Message):
+    return bool(m.text and m.chat.type == enums.ChatType.PRIVATE)
+
+@bot.onMessage(func=filter_text_and_private)
+async def on_message(bot: Bot, message: types.Message):
+    await bot.sendMessage(
+        message.chat.id,
+        "Send your name",
+        reply_to_message_id=message.id
+    )
+    msg = await bot.listen(filter_text_and_private)
+    return await bot.sendMessage(
+        message.chat.id,
+        "Your name is : " + msg.text
+    )
 ```
 
 # LICENSE :

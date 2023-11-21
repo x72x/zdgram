@@ -26,3 +26,5 @@ class AnswerCallbackQuery:
             timeout=timeout
         )
         return True
+
+    answer_callback_query = answerCallbackQuery

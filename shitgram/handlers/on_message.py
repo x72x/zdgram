@@ -7,3 +7,6 @@ class OnMessage:
             self.add_message_handler(func_, func)
             return func_
         return decorator
+
+    def on_message(self: "shitgram.Bot", func: Callable = None):
+        return self.onMessage(func)

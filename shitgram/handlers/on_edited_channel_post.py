@@ -8,3 +8,6 @@ class OnEditedChannelPost:
             self.add_edited_channel_post_handler(func_, func)
             return func_
         return decorator
+
+    def on_edited_channel_post(self: "shitgram.Bot", func: Callable = None):
+        return self.onEditedChannelPost(func)

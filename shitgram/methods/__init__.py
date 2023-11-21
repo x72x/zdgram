@@ -11,9 +11,13 @@ from .send_document import SendDocument
 from .send_video import SendVideo
 from .send_animation import SendAnimation
 from .send_voice import SendVoice
+from .send_location import SendLocation
+from .send_venue import SendVenue
+from .send_video_note import SendVideoNote
 from .answer_callback_query import AnswerCallbackQuery
 from .logout import LogOut
 from .close import Close
+from .listen import Listener
 
 class Methods(
     SendMessage,
@@ -29,8 +33,12 @@ class Methods(
     SendVideo,
     SendAnimation,
     SendVoice,
+    SendLocation,
+    SendVenue,
+    SendVideoNote,
     AnswerCallbackQuery,
     LogOut,
-    Close
+    Close,
+    Listener
 ):
     pass

@@ -75,7 +75,27 @@ class Message:
     video_chat_participants_invited: "shitgram.types.VideoChatParticipantsInvited"
     web_app_data: None
     reply_markup: "shitgram.types.InlineKeyboardMarkup"
+    link: str
 
     def _parse(self, dt: dict):
         dt['id']=dt['message_id']
+        if dt.get('chat'):
+            dt['link']=self._get_link(dt)
+
+        if dt.get("reply_to_message"):
+            dt['reply_to_message']=self._parse(dt['reply_to_message'])
+
         return dt
+
+    @staticmethod
+    def _get_link(message: dict):
+        if message['chat'].get("username"):
+            return "http://t.me/{}/{}".format(
+                message['chat']['username'],
+                str(message['id'])
+            )
+        else:
+            return "http://t.me/c/{}/{}".format(
+                str(message['chat']['id']).replace('-100', ''),
+                str(message['id'])
+            )

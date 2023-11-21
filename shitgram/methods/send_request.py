@@ -72,7 +72,7 @@ class SendRequest:
             params = _prepare_data(params, files)
         session = await shitgram.bot.session_manager.get_session()
         async with session.request(
-            method="post",
+            method="post" if files else "get",
             url=self.api.format(self.bot_token, method_name),
             data=params,
             timeout=aiohttp.ClientTimeout(total=timeout or 300)
@@ -93,3 +93,5 @@ class SendRequest:
                     dumps(resp_json, ensure_ascii=False)
                 )
             return resp_json
+
+    send_request = sendRequest

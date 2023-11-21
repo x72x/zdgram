@@ -8,3 +8,6 @@ class OnEditedMessage:
             self.add_edited_message_handler(func_, func)
             return func_
         return decorator
+
+    def on_edited_message(self: "shitgram.Bot", func: Callable = None):
+        return self.onEditedMessage(func)

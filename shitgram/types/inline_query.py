@@ -29,4 +29,12 @@ class InlineQueryResultsButton(
         self.start_parameter = start_parameter
         self.web_app = web_app
         self.text = text
-        
+
+# class InlineQueryResultArticle(
+#     Parser
+# ):
+#     def __init__(
+#             self
+#     ):
+#         super().__init__()
+#         self.type = "article"

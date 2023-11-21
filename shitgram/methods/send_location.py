@@ -50,6 +50,10 @@ class SendLocation:
             'latitude': latitude,
             'longitude': longitude
         }
+        if self.protect_content:
+            data['protect_content']=self.protect_content
+        if self.disable_notification:
+            data['disable_notification']=self.disable_notification
         if horizontal_accuracy is not None:
             data["horizontal_accuracy"]=horizontal_accuracy
         if live_period is not None:
@@ -60,9 +64,9 @@ class SendLocation:
             data["proximity_alert_radius"]=proximity_alert_radius
         if message_thread_id:
             data['message_thread_id']=message_thread_id
-        if disable_notification:
+        if disable_notification is not None:
             data['disable_notification']=disable_notification
-        if protect_content:
+        if protect_content is not None:
             data['protect_content']=protect_content
         if reply_to_message_id:
             data['reply_to_message_id']=reply_to_message_id
@@ -76,4 +80,6 @@ class SendLocation:
             params=data,
             timeout=timeout
         )
-        return shitgram.types.Update()._parse(shitgram.types.Message()._parse(resp_json.get("result")))
+        return shitgram.bot.update_manager._parse(shitgram.bot.message_manager._parse(resp_json.get("result")))
+
+    send_location = sendLocation

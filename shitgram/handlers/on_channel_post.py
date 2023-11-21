@@ -8,3 +8,6 @@ class OnChannelPost:
             self.add_channel_post_handler(func_, func)
             return func_
         return decorator
+
+    def on_channel_post(self: "shitgram.Bot", func: Callable = None):
+        return self.onChannelPost(func)

@@ -9,3 +9,5 @@ class OnUpdate:
             self.add_any_update_handler(func_)
             return func_
         return decorator
+
+    on_update = onUpdate
