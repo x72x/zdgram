@@ -13,6 +13,13 @@ class InlineKeyboardMarkup(
         super().__init__()
         self.inline_keyboard = inline_keyboard
 
+    @property
+    def get_json(self):
+        data = {"inline_keyboard": []}
+        for i in self.inline_keyboard:
+            data["inline_keyboard"].append([x.__default__(x) for x in i])
+        return data
+
 class InlineKeyboardButton(
     Parser
 ):

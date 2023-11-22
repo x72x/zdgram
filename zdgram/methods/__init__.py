@@ -15,6 +15,7 @@ from .send_location import SendLocation
 from .send_venue import SendVenue
 from .send_video_note import SendVideoNote
 from .answer_callback_query import AnswerCallbackQuery
+from .answer_inline_query import AnswerInlineQuery
 from .logout import LogOut
 from .close import Close
 from .listen import Listener
@@ -37,6 +38,7 @@ class Methods(
     SendVenue,
     SendVideoNote,
     AnswerCallbackQuery,
+    AnswerInlineQuery,
     LogOut,
     Close,
     Listener

@@ -1,7 +1,7 @@
 import zdgram
 
 class CallbackQuery:
-    id: int
+    id: str
     from_user: "zdgram.types.User"
     message: "zdgram.types.Message"
     inline_message_id: str

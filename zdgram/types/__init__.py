@@ -72,7 +72,24 @@ from .input_media import (
     InputMediaPhoto,
     InputMediaDocument
 )
-from .inline_query import InlineQuery, ChosenInlineResult
+from .inline_query import (
+    InlineQuery,
+    ChosenInlineResult,
+    InlineQueryResultArticle,
+    InlineQueryResultsButton,
+    InputTextMessageContent,
+    InputLocationMessageContent,
+    InputVenueMessageContent,
+    InputContactMessageContent,
+    InputInvoiceMessageContent,
+    LabeledPrice,
+    InlineQueryResultAudio,
+    InlineQueryResultGif,
+    InlineQueryResultMpeg4Gif,
+    InlineQueryResultPhoto,
+    InlineQueryResultVideo,
+    InlineQueryResultVoice
+)
 from .chat_invite_link import ChatInviteLink
 from .chat_member import ChatMember, ChatMemberUpdated
 from .chat_join_request import ChatJoinRequest
