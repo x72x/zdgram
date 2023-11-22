@@ -40,7 +40,7 @@ class KeyboardButton(
 class KeyboardButtonRequestUser(
     Parser
 ):
-    def __init__(self, request_id: int = None, user_is_bot: bool = False, user_is_premium: bool = False):
+    def __init__(self, request_id: int = None, user_is_bot: bool = None, user_is_premium: bool = None):
         super().__init__()
         self.request_id = request_id or randint(100, 100*100*10)
         self.user_is_bot = user_is_bot
@@ -49,7 +49,7 @@ class KeyboardButtonRequestUser(
 class KeyboardButtonRequestChat(
     Parser
 ):
-    def __init__(self, request_id: int = None, chat_is_channel: bool = False, chat_is_forum: bool = False, chat_has_username: bool = False, chat_is_created: bool = False, user_administrator_rights: "zdgram.types.ChatAdministratorRights" = None, bot_administrator_rights: "zdgram.types.ChatAdministratorRights" = None, bot_is_member: bool = False):
+    def __init__(self, request_id: int = None, chat_is_channel: bool = None, chat_is_forum: bool = None, chat_has_username: bool = None, chat_is_created: bool = None, user_administrator_rights: "zdgram.types.ChatAdministratorRights" = None, bot_administrator_rights: "zdgram.types.ChatAdministratorRights" = None, bot_is_member: bool = None):
         super().__init__()
         if bot_administrator_rights is not None: self.bot_administrator_rights = bot_administrator_rights
         if user_administrator_rights is not None: self.user_administrator_rights = user_administrator_rights
