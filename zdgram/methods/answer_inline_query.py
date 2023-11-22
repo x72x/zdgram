@@ -8,7 +8,13 @@ class AnswerInlineQuery:
             inline_query_id: str,
             results: List[
                 Union[
-                    "zdgram.types.InlineQueryResultArticle", "None"
+                    "zdgram.types.InlineQueryResultArticle",
+                    "zdgram.types.InlineQueryResultPhoto",
+                    "zdgram.types.InlineQueryResultAudio",
+                    "zdgram.types.InlineQueryResultGif",
+                    "zdgram.types.InlineQueryResultMpeg4Gif",
+                    'zdgram.types.InlineQueryResultVideo',
+                    "zdgram.types.InlineQueryResultVoice"
                 ]
             ],
             cache_time: int = None,
