@@ -1,13 +1,13 @@
 # Install :
 ```commandline
-pip install shitgram==0.1.dev7
+pip install -U zdgram
 ```
 
 # How to use?
 - Config your bot :
 ---
 ```python
-from shitgram import Bot, types
+from zdgram import Bot, types
 
 API_TOKEN = "API_TOKEN_HERE"
 
@@ -85,7 +85,7 @@ bot.run()
 ```python
 import logging
 
-from shitgram import run_multiple_bots, Bot, types, enums
+from zdgram import run_multiple_bots, Bot, types, enums
 
 logging.basicConfig(level=logging.INFO)
 
@@ -107,7 +107,7 @@ bot_1.run(run_multiple_bots([bot_1, bot_2]))
 - Create Listener ( Conversation ):
 ---
 ```python
-from shitgram import types, enums, Bot
+from zdgram import types, enums, Bot
 
 bot = Bot(bot_token="")
 
@@ -129,4 +129,4 @@ async def on_message(bot: Bot, message: types.Message):
 ```
 
 # LICENSE :
-- [MIT](https://github.com/x72x/shitgram/blob/master/LICENSE)
+- [MIT](https://github.com/x72x/zdgram/blob/master/LICENSE)

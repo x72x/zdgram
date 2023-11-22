@@ -1,0 +1,48 @@
+import zdgram
+
+
+class ChatMember:
+    status: str
+    user: "zdgram.types.User"
+    custom_title: str
+    is_anonymous: bool
+    can_be_edited: bool
+    can_manage_chat: bool
+    can_delete_messages: bool
+    can_manage_video_chats: bool
+    can_restrict_members: bool
+    can_promote_members: bool
+    can_change_info: bool
+    can_invite_users: bool
+    can_post_messages: bool
+    can_edit_messages: bool
+    can_pin_messages: bool
+    can_post_stories: bool
+    can_edit_stories: bool
+    can_delete_stories: bool
+    can_manage_topics: bool
+    is_member: bool
+    can_send_messages: bool
+    can_send_audios: bool
+    can_send_documents: bool
+    can_send_photos: bool
+    can_send_videos: bool
+    can_send_video_notes: bool
+    can_send_voice_notes: bool
+    can_send_polls: bool
+    can_send_other_messages: bool
+    can_add_web_page_previews: bool
+    can_change_info: bool
+    can_invite_users: bool
+    can_pin_messages: bool
+    can_manage_topics: bool
+    until_date: int
+
+class ChatMemberUpdated:
+    chat: "zdgram.types.Chat"
+    from_user: "zdgram.types.User"
+    date: int
+    old_chat_member: "ChatMember"
+    new_chat_member: "ChatMember"
+    invite_link: "zdgram.types.ChatInviteLink"
+    via_chat_folder_invite_link: bool

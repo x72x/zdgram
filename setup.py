@@ -5,14 +5,14 @@ import re
 with open("README.md", encoding="utf-8") as f:
     long_description = "\n" + f.read()
 
-with open("shitgram/__init__.py", encoding="utf-8") as f:
+with open("zdgram/__init__.py", encoding="utf-8") as f:
     VERSION = re.findall(r"__version__ = \"(.+)\"", f.read())[0]
 
 DESCRIPTION = 'Python module based on https://core.telegram.org/bots/api'
 
 # Setting up
 setup(
-    name="shitgram",
+    name="zdgram",
     version=VERSION,
     author="ZAID",
     author_email="y8838@hotmail.com",
