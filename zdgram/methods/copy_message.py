@@ -1,7 +1,7 @@
 import zdgram
 
 from typing import Union, List
-from orjson import dumps
+from json import dumps
 
 class CopyMessage:
     async def copyMessage(
@@ -80,7 +80,7 @@ class CopyMessage:
         if caption:
             data['caption']=caption
         if caption_entities:
-            data['caption_entities']=dumps([i.__default__(i) for i in caption_entities]).decode()
+            data['caption_entities']=dumps([i.__default__(i) for i in caption_entities])
         if disable_notification is not None:
             data['disable_notification']=disable_notification
         if protect_content is not None:

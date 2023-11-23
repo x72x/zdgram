@@ -3,7 +3,7 @@ import aiohttp
 import os
 import logging
 
-from orjson import dumps, loads, OPT_INDENT_2
+from json import dumps, loads
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class SendRequest:
             )
             if not resp_json.get("ok"):
                 raise zdgram.exceptions.ApiException(
-                    dumps(resp_json, option=OPT_INDENT_2).decode()
+                    dumps(resp_json, indent=2)
                 )
             return resp_json
 

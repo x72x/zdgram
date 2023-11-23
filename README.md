@@ -53,7 +53,7 @@ async def echo(bot: Bot, message: types.Message):
     )
 ```
 
-- Callback Queries ~~( No CallbackQuery Methods currently )~~
+- Callback Queries .
 ```python
 @bot.onCallbackQuery()
 async def on_callback_query(bot: Bot, callback_query: types.CallbackQuery):
@@ -63,7 +63,7 @@ async def on_callback_query(bot: Bot, callback_query: types.CallbackQuery):
     )
 ```
 
-- Inline Queries ( No InlineQuery Methods currently )
+- Inline Queries .
 ```python
 @bot.onInlineQuery()
 async def on_inline_query(bot: Bot, inline_query: types.InlineQuery):

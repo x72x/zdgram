@@ -1,4 +1,4 @@
-from orjson import dumps
+from json import dumps
 from typing import Union, List
 
 import zdgram
@@ -65,9 +65,9 @@ class SendPhoto:
             data['parse_mode']=parse_mode
         if caption_entities:
             if isinstance(caption_entities[0], zdgram.types.MessageEntity):
-                data['caption_entities']=dumps([i.__default__(i) for i in caption_entities]).decode()
+                data['caption_entities']=dumps([i.__default__(i) for i in caption_entities])
             else:
-                data['caption_entities']=dumps([i.__default__(i) for i in caption_entities]).decode()
+                data['caption_entities']=dumps([i.__default__(i) for i in caption_entities])
         if has_spoiler:
             data['has_spoiler']=has_spoiler
         if message_thread_id:

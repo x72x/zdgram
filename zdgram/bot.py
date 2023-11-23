@@ -7,7 +7,7 @@ import zdgram
 
 
 from typing import Callable, Union, List
-from orjson import loads
+from json import loads
 from .methods import Methods
 from .types import Update, User, Message, Chat
 from .handlers import Handlers
@@ -608,7 +608,7 @@ class Bot(Methods, Handlers):
                 )
 
         logger.info(
-            "   Start polling at %s", str(me)
+            "   Start polling at %s", me
         )
         self.me = me
         asyncio.create_task(self.auto_clean_cache())
