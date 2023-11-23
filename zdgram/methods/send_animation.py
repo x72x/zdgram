@@ -1,4 +1,4 @@
-from json import dumps
+from orjson import dumps
 from typing import Union, List
 
 import zdgram
@@ -74,9 +74,9 @@ class SendAnimation:
             data['parse_mode']=parse_mode
         if caption_entities:
             if isinstance(caption_entities[0], zdgram.types.MessageEntity):
-                data['caption_entities']=dumps([i.__dict__ for i in caption_entities], ensure_ascii=False)
+                data['caption_entities']=dumps([i.__default__(i) for i in caption_entities]).decode()
             else:
-                data['caption_entities']=dumps([i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False)
+                data['caption_entities']=dumps([i.__default__(i) for i in caption_entities]).decode()
         if duration:
             data["duration"]=duration
         if width:

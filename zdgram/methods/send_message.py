@@ -1,4 +1,4 @@
-from json import dumps
+from orjson import dumps
 from typing import Union, List
 
 import zdgram
@@ -58,7 +58,7 @@ class SendMessage:
         if parse_mode is not None:
             data['parse_mode']=parse_mode
         if entities:
-            data['entities']=dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in entities])
+            data['entities']=dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__default__(i) for i in entities]).decode()
         if disable_web_page_preview is not None:
             data['disable_web_page_preview']=disable_web_page_preview
         if disable_notification is not None:

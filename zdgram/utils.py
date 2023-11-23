@@ -1,6 +1,6 @@
 from . import types
 from typing import Union, List
-from json import dumps, loads
+from orjson import dumps, loads
 
 import os
 import aiohttp
@@ -16,7 +16,7 @@ async def convert_input_media_array(array):
                 key = media_dict['media'].replace('attach://', '')
                 files[key] = input_media.media
             media.append(media_dict)
-    return dumps(media), files
+    return dumps(media).decode(), files
 
 async def send_media_group(
         bot: "zdgram.Bot", chat_id, media,
@@ -61,7 +61,7 @@ def reply_markup_parse(
         reply_markup: Union["str", "dict", "types.InlineKeyboardMarkup", "types.ForceReply"]
 ):
     if isinstance(reply_markup, dict):
-        return dumps(reply_markup, ensure_ascii=False)
+        return dumps(reply_markup).decode()
     elif isinstance(reply_markup, str):
         return reply_markup
     elif isinstance(

@@ -1,6 +1,6 @@
 import zdgram
 from typing import List, Union
-from json import dumps
+from orjson import dumps
 
 class AnswerInlineQuery:
     async def answerInlineQuery(
@@ -23,7 +23,7 @@ class AnswerInlineQuery:
             button: "zdgram.types.InlineQueryResultsButton" = None,
             timeout: int = None
     ):
-        data = {"inline_query_id": inline_query_id, "results": dumps([i.__default__(i) for i in results])}
+        data = {"inline_query_id": inline_query_id, "results": dumps([i.__default__(i) for i in results]).decode()}
         if is_personal:
             data["is_personal"]=is_personal
         if next_offset:

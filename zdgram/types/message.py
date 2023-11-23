@@ -79,9 +79,8 @@ class Message:
 
     def _parse(self, dt: dict):
         dt['id']=dt['message_id']
-        if dt.get('chat'):
+        if dt.get('chat') and dt["chat"]["type"] != "private":
             dt['link']=self._get_link(dt)
-
         if dt.get("reply_to_message"):
             dt['reply_to_message']=self._parse(dt['reply_to_message'])
 

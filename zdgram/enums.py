@@ -10,6 +10,6 @@ ChatType = __ChatType()
 class __ParseMode:
     MARKDOWN, MD = "markdown", "markdown"
     HTML = "html"
-    MARKDOWNV2 = "MarkdownvV2"
+    MARKDOWNV2 = "MarkdownV2"
 
 ParseMode = __ParseMode()

@@ -1,7 +1,5 @@
 import zdgram
 
-from json import dumps
-
 class GetMe:
     async def getMe(self: "zdgram.Bot") -> "zdgram.types.User":
         """

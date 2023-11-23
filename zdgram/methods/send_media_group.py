@@ -1,6 +1,5 @@
 import zdgram
 from typing import Union, List
-from json import dumps
 
 class SendMediaGroup:
     async def sendMediaGroup(

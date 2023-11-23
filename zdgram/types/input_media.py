@@ -16,7 +16,7 @@ class InputMediaPhoto(
     ):
         super().__init__()
         self.has_spoiler = has_spoiler
-        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False) if caption_entities else None
+        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__default__(i) for i in caption_entities], ensure_ascii=False) if caption_entities else None
         self.parse_mode = parse_mode
         self.caption = caption
         self.media = media
@@ -41,7 +41,7 @@ class InputMediaAudio(
         self.performer = performer
         self.duration = duration
         self.thumbnail = thumbnail
-        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False) if caption_entities else None
+        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__default__(i) for i in caption_entities], ensure_ascii=False) if caption_entities else None
         self.parse_mode = parse_mode
         self.caption = caption
         self.media = media
@@ -63,7 +63,7 @@ class InputMediaDocument(
         super().__init__()
         self.disable_content_type_detection = disable_content_type_detection
         self.thumbnail = thumbnail
-        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False) if caption_entities else None
+        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__default__(i) for i in caption_entities], ensure_ascii=False) if caption_entities else None
         self.parse_mode = parse_mode
         self.caption = caption
         self.media = media
@@ -90,7 +90,7 @@ class InputMediaAnimation(
         self.height = height
         self.duration = duration
         self.thumbnail = thumbnail
-        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False) if caption_entities else None
+        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__default__(i) for i in caption_entities], ensure_ascii=False) if caption_entities else None
         self.parse_mode = parse_mode
         self.caption = caption
         self.media = media
@@ -119,7 +119,7 @@ class InputMediaVideo(
         self.height = height
         self.duration = duration
         self.thumbnail = thumbnail
-        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__dict__.get("_DictionaryToClass__dict") for i in caption_entities], ensure_ascii=False) if caption_entities else None
+        self.caption_entities = dumps([str(i) if isinstance(i, zdgram.types.MessageEntity) else i.__default__(i) for i in caption_entities], ensure_ascii=False) if caption_entities else None
         self.parse_mode = parse_mode
         self.caption = caption
         self.media = media

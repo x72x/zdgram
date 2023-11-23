@@ -19,6 +19,7 @@ from .answer_inline_query import AnswerInlineQuery
 from .logout import LogOut
 from .close import Close
 from .listen import Listener
+from .get_chat import GetChat
 
 class Methods(
     SendMessage,
@@ -41,6 +42,7 @@ class Methods(
     AnswerInlineQuery,
     LogOut,
     Close,
-    Listener
+    Listener,
+    GetChat
 ):
     pass

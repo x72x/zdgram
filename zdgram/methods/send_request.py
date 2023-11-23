@@ -3,7 +3,9 @@ import aiohttp
 import os
 import logging
 
-from json import dumps
+from orjson import dumps, loads, OPT_INDENT_2
+
+logger = logging.getLogger(__name__)
 
 def _prepare_file(obj):
     """
@@ -52,19 +54,9 @@ class SendRequest:
             timeout: int = None,
     ) -> dict:
         if method_name.lower() != "getupdates":
-            logging.info(
-                "   Sending request : \n {}".format(
-                    dumps(
-                        {
-                            "method_name": method_name,
-                            "params": params,
-                            "files": True if files else None,
-                            "timeout": timeout
-                        },
-                        indent=4,
-                        ensure_ascii=False
-                    )
-                )
+            logger.debug(
+                "   Sending request : %s",
+                method_name
             )
         if params and params.get("chat_id"):
             params.update({"chat_id": str(params.get("chat_id"))})
@@ -75,22 +67,17 @@ class SendRequest:
             method="post" if files else "get",
             url=self.api.format(self.bot_token, method_name),
             data=params,
-            timeout=aiohttp.ClientTimeout(total=timeout or 300)
+            timeout=aiohttp.ClientTimeout(total=timeout or 60)
         ) as resp:
-            resp_json = await resp.json()
+            resp_json = loads(await resp.read())
             if method_name.lower() != "getupdates":
-                logging.info(
-                    "   Response information : \n {}".format(
-                        dumps(
-                            resp_json,
-                            indent=4,
-                            ensure_ascii=False
-                        )
-                    )
-                )
+                logger.debug(
+                "   Responce recived: %s",
+                method_name
+            )
             if not resp_json.get("ok"):
                 raise zdgram.exceptions.ApiException(
-                    dumps(resp_json, ensure_ascii=False)
+                    dumps(resp_json, option=OPT_INDENT_2).decode()
                 )
             return resp_json
 

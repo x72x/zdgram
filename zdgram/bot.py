@@ -7,10 +7,13 @@ import zdgram
 
 
 from typing import Callable, Union, List
+from orjson import loads
 from .methods import Methods
-from .types import Update, User, Message
+from .types import Update, User, Message, Chat
 from .handlers import Handlers
 from .utils import all_updates
+
+logger = logging.getLogger(__name__)
 
 API_URL = "https://api.telegram.org/"
 
@@ -47,6 +50,7 @@ session_manager = SessionManager()
 update_manager = Update()
 message_manager = Message()
 user_manager = User()
+chat_manager = Chat()
 
 class Bot(Methods, Handlers):
     def __init__(
@@ -57,18 +61,30 @@ class Bot(Methods, Handlers):
             parse_mode: str = None,
             disable_web_page_preview: bool = None,
             protect_content: bool = None,
-            disable_notification: bool = None
+            disable_notification: bool = None,
         ) -> None:
         """Auth the bot
 
         Args:
-            bot_token (str): HTTP URL TOKEN
-            api_url (str, optional): API Server URL. Defaults to https://api.telegram.org/.
-            allowed_updates(List[str], optional): List of allowed updates.
-            parse_mode (str, optional): Default parse_mode.
-            disable_web_page_preview (bool, optional): Pass true to disable all web page previews from the bot.
-            protect_content (bool, optional): Protect all outgoing messages from the bot.
-            disable_notification (bool, optional): Send all outgoing messages silently.
+            bot_token (`str`): HTTP URL TOKEN
+
+            api_url (`str`, optional): API Server URL. Defaults to https://api.telegram.org/.
+
+            allowed_updates(`List[str]`, optional): List of allowed updates.
+
+            parse_mode (`str`, optional): Default parse_mode.
+
+            disable_web_page_preview (`bool`, optional): Pass true to disable all web page previews from the bot.
+
+            protect_content (`bool`, optional): Protect all outgoing messages from the bot.
+
+            disable_notification (`bool`, optional): Send all outgoing messages silently.
+
+            ```
+            from zdgram import Bot
+
+            bot = Bot("TOKEN_HERE")
+            ```
         """
         self.bot_token = bot_token
         self.parse_mode = parse_mode
@@ -76,7 +92,6 @@ class Bot(Methods, Handlers):
         self.protect_content = protect_content
         self.disable_notification = disable_notification
         self.version = zdgram.__version__
-        self.__cache = []
         self.__funcs = []
         self.__message_handlers = []
         self.__edited_message_handlers = []
@@ -98,7 +113,8 @@ class Bot(Methods, Handlers):
         self.api = (api_url or API_URL) + "bot{}/{}"
         self.getUpdatesData = {
             "offset": -1,
-            "allowed_updates": allowed_updates or all_updates
+            "allowed_updates": allowed_updates or all_updates,
+            "limit": 100
         }
         self.me: Union["User", "None"] = None
         self.id = bot_token.split(':')[0]
@@ -106,229 +122,206 @@ class Bot(Methods, Handlers):
     async def get_updates(self):
         updates = await self.sendRequest(
             method_name="getUpdates",
-            params=self.getUpdatesData
+            params=self.getUpdatesData,
+            timeout=55
         )
         for update in updates.get("result"):
-            if not self.__cache:
-                self.__cache.append(update.get("update_id"))
-                logging.info(
-                    "getUpdates running now at {}".format(
-                        (await self.getMe()).username
-                    )
-                )
-                continue
-            if update.get("update_id") not in self.__cache:
-                self.__cache.append(update.get("update_id"))
-                upd = update_manager._parse(update)
-                logging.info(
-                    "   New update at {} \n\n {}".format(
-                        (await self.getMe()).username,
-                        str(upd)
-                    )
-                )
-                for func in self.__funcs:
-                    asyncio.create_task(func(self, upd))
-                if update.get("message"):
-                    _ = True
-                    for func in self.__message_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.message):
-                            continue
-                        for i in self._listener:
-                            if i(upd.message):
-                                _ = False
-                                break
-                        if not _:
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onMessage"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.message))
-                if update.get("message"):
-                    for func in self._listener:
-                        if not func(upd.message):
-                            continue
-                        else:
-                            self._listener_cache.update(
-                                {id(func): upd.message}
-                            )
-                            self._listener.remove(func)
-                if update.get("edited_message"):
-                    for func in self.__edited_message_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.message):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onEditedMessage"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.message))
-                if update.get("callback_query"):
-                    for func in self.__callback_query_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.callback_query):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onCallbackQuery"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.callback_query))
-                if update.get("inline_query"):
-                    for func in self.__inline_query_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.inline_query):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onInlineQuery"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.inline_query))
-                if update.get("chosen_inline_result"):
-                    for func in self.__chosen_inline_result_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.chosen_inline_result):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onChosenInlineResult"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.chosen_inline_result))
-                if update.get("channel_post"):
-                    for func in self.__channel_post_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.message):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onChannelPost"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.message))
-                if update.get("edited_channel_post"):
-                    for func in self.__edited_channel_post_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.message):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onEditedChannelPost"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.message))
-                if update.get("my_chat_member"):
-                    for func in self.__my_chat_member_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.my_chat_member):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onMyChatMember"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.my_chat_member))
-                if update.get("chat_member"):
-                    for func in self.__chat_member_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.chat_member):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onChatMember"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.chat_member))
-                if update.get("chat_join_request"):
-                    for func in self.__chat_join_request_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.chat_join_request):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onChatJoinRequest"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.chat_join_request))
-                if update.get("poll"):
-                    for func in self.__poll_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.poll):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onPoll"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.poll))
-                if update.get("poll_answer"):
-                    for func in self.__poll_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.poll_answer):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onPollAnswer"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.poll_answer))
-                if update.get("shipping_query"):
-                    for func in self.__shipping_query_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.shipping_query):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onShippingQuery"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.shipping_query))
-                if update.get("pre_checkout_query"):
-                    for func in self.__pre_checkout_query_handlers:
-                        if (func['filter_func']) and not func['filter_func'](upd.pre_checkout_query):
-                            continue
-                        else:
-                            logging.info(
-                                "   Creating TASK into {} , handler : {}".format(
-                                    func['func'].__name__,
-                                    "onPreCheckoutQuery"
-                                )
-                            )
-                            asyncio.create_task(func['func'](self, upd.pre_checkout_query))
+            self.getUpdatesData.update(
+                {"offset": update.get("update_id") + 1}
+            )
+            upd = update_manager._parse(update)
+            logger.debug(
+                "   New update at %s - Update id : %s",
+                self.me.username,
+                upd.update_id
+            )
+            for func in self.__funcs:
+                asyncio.create_task(func(self, upd))
+            if update.get("message"):
+                _ = True
+                for func in self.__message_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.message):
+                        continue
+                    for i in self._listener:
+                        if i(upd.message):
+                            _ = False
+                            break
+                    if not _:
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onMessage"
+                        )
+                        asyncio.create_task(func['func'](self, upd.message))
+            if update.get("message"):
+                for func in self._listener:
+                    if not func(upd.message):
+                        continue
+                    else:
+                        self._listener_cache.update(
+                            {id(func): upd.message}
+                        )
+                        self._listener.remove(func)
+            if update.get("edited_message"):
+                for func in self.__edited_message_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.message):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onEditedMessage"
+                        )
+                        asyncio.create_task(func['func'](self, upd.message))
+            if update.get("callback_query"):
+                for func in self.__callback_query_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.callback_query):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onCallbackQuery"
+                        )
+                        asyncio.create_task(func['func'](self, upd.callback_query))
+            if update.get("inline_query"):
+                for func in self.__inline_query_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.inline_query):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onInlineQuery"
+                        )
+                        asyncio.create_task(func['func'](self, upd.inline_query))
+            if update.get("chosen_inline_result"):
+                for func in self.__chosen_inline_result_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.chosen_inline_result):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onChosenInlineResult"
+                        )
+                        asyncio.create_task(func['func'](self, upd.chosen_inline_result))
+            if update.get("channel_post"):
+                for func in self.__channel_post_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.message):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onChannelPost"
+                        )
+                        asyncio.create_task(func['func'](self, upd.message))
+            if update.get("edited_channel_post"):
+                for func in self.__edited_channel_post_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.message):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onEditedChannelPost"
+                        )
+                        asyncio.create_task(func['func'](self, upd.message))
+            if update.get("my_chat_member"):
+                for func in self.__my_chat_member_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.my_chat_member):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onMyChatMember"
+                        )
+                        asyncio.create_task(func['func'](self, upd.my_chat_member))
+            if update.get("chat_member"):
+                for func in self.__chat_member_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.chat_member):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onChatMember"
+                        )
+                        asyncio.create_task(func['func'](self, upd.chat_member))
+            if update.get("chat_join_request"):
+                for func in self.__chat_join_request_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.chat_join_request):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onChatJoinRequest"
+                        )
+                        asyncio.create_task(func['func'](self, upd.chat_join_request))
+            if update.get("poll"):
+                for func in self.__poll_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.poll):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onPoll"
+                        )
+                        asyncio.create_task(func['func'](self, upd.poll))
+            if update.get("poll_answer"):
+                for func in self.__poll_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.poll_answer):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onPollAnswer"
+                        )
+                        asyncio.create_task(func['func'](self, upd.poll_answer))
+            if update.get("shipping_query"):
+                for func in self.__shipping_query_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.shipping_query):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onShippingQuery"
+                        )
+                        asyncio.create_task(func['func'](self, upd.shipping_query))
+            if update.get("pre_checkout_query"):
+                for func in self.__pre_checkout_query_handlers:
+                    if (func['filter_func']) and not func['filter_func'](upd.pre_checkout_query):
+                        continue
+                    else:
+                        logger.debug(
+                            "   Creating TASK into %s , handler : %s",
+                            func['func'].__name__,
+                            "onPreCheckoutQuery"
+                        )
+                        asyncio.create_task(func['func'](self, upd.pre_checkout_query))
 
     async def auto_clean_cache(self):
         while not await asyncio.sleep(600):
             self.cache.clear()
-            logging.info(
-                "   Cache are cleared at {}".format(
-                    self.id
-                )
+            logger.debug(
+                "   Cache are cleared at %s",
+                self.me.username
             )
 
     def add_any_update_handler(self, func_: Callable):
         self.__funcs.append(func_)
-        logging.info(
-            "   Added {} to handle any update at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to any update handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_callback_query_handler(self, func_: Callable, func: Callable = None):
@@ -338,11 +331,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to callback_query handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to callback_query handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_inline_query_handler(self, func_: Callable, func: Callable = None):
@@ -352,11 +344,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to inline_query handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to inline_query handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_chosen_inline_result_handler(self, func_: Callable, func: Callable = None):
@@ -366,11 +357,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to chosen_inline_result handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to chosen_inline_result handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_edited_message_handler(self, func_: Callable, func: Callable = None):
@@ -380,11 +370,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to edited_message handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to edited_message handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_message_handler(self, func_: Callable, func: Callable = None):
@@ -394,11 +383,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to message handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to message handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_channel_post_handler(self, func_: Callable, func: Callable = None):
@@ -408,11 +396,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to channel_post handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to channel_post handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_edited_channel_post_handler(self, func_: Callable, func: Callable = None) -> Callable:
@@ -422,11 +409,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to edited_channel post handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to edited_channel_post handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_my_chat_member_handler(self, func_: Callable, func: Callable = None):
@@ -436,11 +422,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to my_chat_member handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to my_chat_member handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_chat_member_handler(self, func_: Callable, func: Callable = None):
@@ -450,11 +435,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to chat_member handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to chat_member handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_chat_join_request_handler(self, func_: Callable, func: Callable = None):
@@ -464,11 +448,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to chat_join_request handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to chat_join_request handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_poll_handler(self, func_: Callable, func: Callable = None):
@@ -478,11 +461,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to poll handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to poll handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_poll_answer_handler(self, func_: Callable, func: Callable = None):
@@ -492,11 +474,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to poll_answer handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to poll_answer handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_shipping_query_handler(self, func_: Callable, func: Callable = None):
@@ -506,11 +487,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to shipping_query handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to shipping_query handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_pre_checkout_query_handler(self, func_: Callable, func: Callable = None):
@@ -520,11 +500,10 @@ class Bot(Methods, Handlers):
                 "filter_func": func
             }
         )
-        logging.info(
-            "   Added {} to pre_checkout_query handlers at {}".format(
-                func_.__name__,
-                self.id
-            )
+        logger.info(
+            "   Added %s to pre_checkout_query handlers at %s",
+            func_.__name__,
+            self.id
         )
 
     def add_listen_handler(self, func: Callable = None):
@@ -614,22 +593,27 @@ class Bot(Methods, Handlers):
 
         if _:
             msg = ", ".join(_)
-            logging.info(
-                "   Deleted {} handlers, because they're not coroutine functions".format(msg)
+            logger.info(
+                "   Deleted %s handlers, because they're not coroutine functions", msg
             )
 
     async def start_polling(self):
         self.__clear_bugs()
-        logging.info(
-            "   Start polling at {}".format(
-                str(await self.getMe())
-            )
+        try:
+            me = await self.getMe()
+        except zdgram.exceptions.ApiException as x:
+            if loads(str(x)).get("description") == "Not Found":
+                raise zdgram.exceptions.BotTokenInvalid(
+                    f"API TOKEN IS WRONG : {loads(str(x))}"
+                )
+
+        logger.info(
+            "   Start polling at %s", str(me)
         )
-        self.me = await self.getMe()
+        self.me = me
         asyncio.create_task(self.auto_clean_cache())
         while True:
-            task = asyncio.create_task(self.get_updates())
-            await task
+            await asyncio.create_task(self.get_updates())
 
     def run(self, coro=None):
         if coro:

@@ -1,4 +1,5 @@
-from json import dumps
+from orjson import dumps
+from orjson import OPT_INDENT_2
 
 class Parser:
     def __init__(self):
@@ -17,4 +18,4 @@ class Parser:
         } if not isinstance(obj, set) else [i for i in obj]
 
     def __str__(self) -> str:
-        return dumps(self, indent=4, default=Parser.__default__, ensure_ascii=False)
+        return dumps(self, default=Parser.__default__, option=OPT_INDENT_2).decode()

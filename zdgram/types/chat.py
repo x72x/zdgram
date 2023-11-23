@@ -31,3 +31,9 @@ class Chat:
     can_set_sticker_set: bool
     linked_chat_id: int
     location: "zdgram.types.Location"
+    link: str
+
+    def _parse(self, dc: dict):
+        if dc.get('username'):
+            dc['link']="http://t.me/{}".format(dc['username'])
+        return dc

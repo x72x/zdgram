@@ -4,4 +4,4 @@ from . import exceptions
 from . import utils
 from .utils import run_multiple_bots
 
-__version__ = "0.1.dev3"
+__version__ = "0.1.dev4"

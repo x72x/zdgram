@@ -1,19 +1,20 @@
 
 from .parser import Parser
 import zdgram
-
+import logging
 
 class DictionaryToClass(Parser):
     def __init__(self, dic: dict):
         super().__init__()
-        self.__dict = dic
         __ = False
         while not __:
             try:
                 for i in dic:
                     if isinstance(dic[i], dict):
-                        if i == "from":
+                        if i in {"from", "user"}:
                             dic[i]=zdgram.bot.user_manager._parse(dic[i])
+                        elif i == "chat":
+                            dic[i]=zdgram.bot.chat_manager._parse(dic[i])
                         setattr(self, "from_user" if i == "from" else "message" if i in ["edited_message", "channel_post", "edited_channel_post"] else i, DictionaryToClass(dic[i]))
                     elif isinstance(dic[i], list):
                         setattr(self, i, [DictionaryToClass(x) if isinstance(x, dict) else x for x in dic[i]])
@@ -21,7 +22,7 @@ class DictionaryToClass(Parser):
                         setattr(self, i, dic[i])
                 __ = True
             except Exception as e:
-                print(e)
+                logging.getLogger(__name__).debug("Error %s", str(e))
 
     def __getattr__(self, __name: str) -> None:
         return None
@@ -38,6 +39,7 @@ class Update:
     poll_answer: "zdgram.types.PollAnswer"
     shipping_query: "zdgram.types.ShippingQuery"
     pre_checkout_query: "zdgram.types.PreCheckoutQuery"
+    update_id: int
 
     def _parse(self, dt: dict) -> "Update":
         for i in dt:

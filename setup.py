@@ -20,7 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(exclude=["examples"]),
-    install_requires=['asyncio', 'aiohttp'],
+    install_requires=['asyncio', 'aiohttp', 'orjson'],
     keywords=['bots', 'bot-api', 'telegram'],
     classifiers=[
         "Development Status :: 1 - Planning",
