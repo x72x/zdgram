@@ -4,7 +4,7 @@ import logging
 import ssl
 import certifi
 import zdgram
-
+import sqlite3
 
 from typing import Callable, Union, List
 from json import loads
@@ -107,8 +107,12 @@ class Bot(Methods, Handlers):
         self.__poll_answer_handlers = []
         self.__shipping_query_handlers = []
         self.__pre_checkout_query_handlers = []
+        self.__redis = None
+        self.__sqlite = None
         self._listener = []
+        self._callback_listener = []
         self._listener_cache = {}
+        self._callback_listener_cache = {}
         self.cache = {}
         self.api = (api_url or API_URL) + "bot{}/{}"
         self.getUpdatesData = {
@@ -138,8 +142,8 @@ class Bot(Methods, Handlers):
             for func in self.__funcs:
                 asyncio.create_task(func(self, upd))
             if update.get("message"):
-                _ = True
                 for func in self.__message_handlers:
+                    _ = True
                     if (func['filter_func']) and not func['filter_func'](upd.message):
                         continue
                     for i in self._listener:
@@ -177,7 +181,14 @@ class Bot(Methods, Handlers):
                         asyncio.create_task(func['func'](self, upd.message))
             if update.get("callback_query"):
                 for func in self.__callback_query_handlers:
+                    _ = True
                     if (func['filter_func']) and not func['filter_func'](upd.callback_query):
+                        continue
+                    for i in self._callback_listener:
+                        if upd.callback_query.data == i:
+                            _ = False
+                            break
+                    if not _:
                         continue
                     else:
                         logger.debug(
@@ -186,6 +197,15 @@ class Bot(Methods, Handlers):
                             "onCallbackQuery"
                         )
                         asyncio.create_task(func['func'](self, upd.callback_query))
+            if update.get("callback_query"):
+                for i in self._callback_listener:
+                    if upd.callback_query.data != i:
+                        continue
+                    else:
+                        self._callback_listener_cache.update(
+                            {i: upd.callback_query}
+                        )
+                        self._callback_listener.remove(i)
             if update.get("inline_query"):
                 for func in self.__inline_query_handlers:
                     if (func['filter_func']) and not func['filter_func'](upd.inline_query):
@@ -514,6 +534,48 @@ class Bot(Methods, Handlers):
             {id(func): None}
         )
 
+    def add_callback_listen_handler(self, data: str = None):
+        if data in self._callback_listener:
+            return
+        self._callback_listener.append(data)
+        self._callback_listener_cache.update(
+            {data: None}
+        )
+
+    @property
+    def sqlite(self) -> "sqlite3.Connection":
+        """sqlite connector
+
+        Returns:
+            `sqlite3.Connection`
+
+        Example:
+            ```
+            @bot.onMessage(text_and_private)
+            async def on_m(bot: Bot, message: types.Message):
+                bot.sqlite.execute('''CREATE TABLE IF NOT EXISTS COMPANY
+                    (ID INT PRIMARY KEY     NOT NULL,
+                    NAME           TEXT    NOT NULL,
+                    AGE            INT     NOT NULL,
+                    ADDRESS        CHAR(50),
+                    SALARY         REAL);''')
+                bot.sqlite.execute("INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) \
+                    VALUES (1, 'Paul', 32, 'California', 20000.00 )")
+                await bot.sendMessage(
+                    message.chat.id,
+                    "Done",
+                    reply_to_message_id=message.id
+                )
+                bot.sqlite.commit()
+            ```
+        """
+        if self.__sqlite is not None:
+            return self.__sqlite
+        else:
+            connector = sqlite3.connect("zd.gram")
+            self.__sqlite = connector
+            return connector
+
     def __clear_bugs(self):
         _ = []
         for i in self.__funcs:
@@ -616,6 +678,40 @@ class Bot(Methods, Handlers):
             await asyncio.create_task(self.get_updates())
 
     def run(self, coro=None):
+        """same `asyncio.run` job to run any coroutine func or to `start_polling`.
+
+        Args:
+            coro (optional): Coroutine function. Defaults to None.
+
+        Returns:
+            `Any`
+
+        Examples:
+            1 : Run coroutine function:
+                ```
+                print(bot.run(bot.getMe()).mention)
+                ```
+
+                OUTPUT:
+                ```
+                {
+                    "markdown": "...",
+                    "html": "..."
+                }
+                ```
+            2 : Run bot polling:
+                ```
+                from zdgram import Bot, types
+
+                bot = Bot("TOKEN")
+
+                @bot.onMessage()
+                async def hello(bot: Bot, message: types.Message):
+                    print(message)
+
+                bot.run()
+                ```
+        """
         if coro:
             return asyncio.run(coro)
         return asyncio.run(self.start_polling())
