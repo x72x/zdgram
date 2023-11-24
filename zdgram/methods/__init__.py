@@ -20,6 +20,12 @@ from .logout import LogOut
 from .close import Close
 from .listen import Listener
 from .get_chat import GetChat
+from .edit_message_text import EditMessageText
+from .edit_message_caption import EditMessageCaption
+from .edit_message_media import EditMessageMedia
+from .edit_message_reply_markup import EditMessageReplyMarkup
+from .stop_poll import StopPoll
+from .delete_message import DeleteMessage
 
 class Methods(
     SendMessage,
@@ -43,6 +49,12 @@ class Methods(
     LogOut,
     Close,
     Listener,
-    GetChat
+    GetChat,
+    EditMessageText,
+    EditMessageCaption,
+    EditMessageMedia,
+    EditMessageReplyMarkup,
+    StopPoll,
+    DeleteMessage
 ):
     pass

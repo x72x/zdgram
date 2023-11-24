@@ -69,12 +69,12 @@ class SendRequest:
             data=params,
             timeout=aiohttp.ClientTimeout(total=timeout or 60)
         ) as resp:
-            resp_json = loads(await resp.read())
+            resp_json = await resp.json()
             if method_name.lower() != "getupdates":
                 logger.debug(
-                "   Responce recived: %s",
-                method_name
-            )
+                    "   Responce recived: %s",
+                    method_name
+                )
             if not resp_json.get("ok"):
                 raise zdgram.exceptions.ApiException(
                     dumps(resp_json, indent=2)
